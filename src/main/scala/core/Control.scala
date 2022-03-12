@@ -1,4 +1,4 @@
-package rvcpu
+package rvcpu.core
 
 import chisel3._
 import chisel3.util._
@@ -36,9 +36,9 @@ object WbSel extends ChiselEnum {
   val alu, mem, pc4 = Value
 }
 
-object Control {
-  import Instructions._
+import Instructions._
 
+object Control {
   val Y = true.B
   val N = false.B
   //                                                                                       kill                                  wb_en illegal

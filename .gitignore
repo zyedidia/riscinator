@@ -1,4 +1,4 @@
-generated-src
+generated
 outputs
 test_run_dir
 target
@@ -30,3 +30,16 @@ tests/64/*
 # Synopsys Verdi
 novas_dump.log
 ucli.key
+
+*.asc
+*.bin
+*.json
+.DS_Store
+*.dSYM
+*.elf
+*_out.config
+*.bit
+*.dfu
+*.list
+*.out
+*.hex

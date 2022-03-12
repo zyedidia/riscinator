@@ -1,4 +1,4 @@
-package rvcpu
+package rvcpu.core
 
 import chisel3.util.BitPat
 
