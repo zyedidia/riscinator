@@ -49,7 +49,7 @@ class Datapath(conf: Config) extends Module {
   when (stall) {
     next_pc := pc
   } .elsewhen (io.ctrl.pc_sel === PcSel.alu || brCond.io.taken) {
-    next_pc := alu.io.sum & ~0x1.U
+    next_pc := alu.io.sum & ~(0x1.U(32.W))
   } .elsewhen (io.ctrl.pc_sel === PcSel.plus0) {
     next_pc := pc
   } .otherwise {
@@ -63,7 +63,7 @@ class Datapath(conf: Config) extends Module {
   }
 
   io.imem.addr := next_pc
-  io.imem.req := !stall
+  io.imem.req := !stall || reset.asBool
 
   when (!stall) {
     fe_pc := pc
@@ -101,7 +101,7 @@ class Datapath(conf: Config) extends Module {
   brCond.io.rs2 := rs2
   brCond.io.br_type := io.ctrl.br_type
 
-  val daddr = Mux(stall, ew_alu, alu.io.sum) & ~0x3.U
+  val daddr = Mux(stall, ew_alu, alu.io.sum) & ~(0x3.U(32.W))
   val woffset = (alu.io.sum(1) << 4.U).asUInt | (alu.io.sum(0) << 3.U).asUInt
   io.dmem.req := !stall && (io.ctrl.st_type =/= StType.none || io.ctrl.ld_type =/= LdType.none)
   io.dmem.we := !stall && io.ctrl.st_type =/= StType.none

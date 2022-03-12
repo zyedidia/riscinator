@@ -54,7 +54,7 @@ class Ram(size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Modul
   io.dmem.rvalid := drvalid
 
   val iaddr = io.imem.addr >> 2
-  val daddr = io.imem.addr >> 2
+  val daddr = io.dmem.addr >> 2
   io.imem.rdata := mem.read(iaddr, io.imem.req)
   io.dmem.rdata := mem.read(daddr, io.dmem.req)
 
