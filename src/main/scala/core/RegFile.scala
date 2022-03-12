@@ -20,17 +20,8 @@ class RegFile(size: Int, width: Int) extends Module {
 
   val regs = Mem(size, UInt(width.W))
 
-  when (io.raddr1 === 0.U(width.W)) {
-    io.rdata1 := 0.U(width.W)
-  } .otherwise {
-    io.rdata1 := regs(io.raddr1)
-  }
-
-  when (io.raddr2 === 0.U(width.W)) {
-    io.rdata2 := 0.U(width.W)
-  } .otherwise {
-    io.rdata2 := regs(io.raddr2)
-  }
+  io.rdata0 := Mux(io.raddr0 === 0.U(width.W), 0.U(width.W), regs(io.raddr0))
+  io.rdata1 := Mux(io.raddr1 === 0.U(width.W), 0.U(width.W), regs(io.raddr1))
 
   when (io.wen && io.waddr =/= 0.U(width.W)) {
     regs(io.waddr) := io.wdata
