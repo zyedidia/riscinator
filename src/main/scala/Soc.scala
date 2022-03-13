@@ -25,4 +25,3 @@ class Soc extends Module {
 object Soc extends App {
   (new chisel3.stage.ChiselStage).emitVerilog(new Soc, Array("--target-dir", "generated"))
 }
-

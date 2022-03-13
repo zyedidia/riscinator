@@ -4,8 +4,8 @@ import chisel3._
 import chisel3.util._
 
 class DatapathIO(xlen: Int) extends Bundle {
-  val imem = new ImemIO(xlen, xlen)
-  val dmem = new DmemIO(xlen, xlen)
+  val imem = new bus.InstIO(xlen, xlen)
+  val dmem = new bus.DataIO(xlen, xlen)
   val ctrl = Flipped(new ControlIO)
 }
 
@@ -41,7 +41,14 @@ class Datapath(conf: Config) extends Module {
   // Fetch stage
 
   val started = RegNext(reset.asBool)
-  val stall = !io.imem.rvalid || !io.dmem.rvalid
+  val imem_rd_req = Wire(Bool())
+  val dmem_rd_req = Wire(Bool())
+  val dmem_wr_req = Wire(Bool())
+  val stall = Wire(Bool())
+  stall := (imem_rd_req && !io.imem.rvalid) ||
+           (dmem_rd_req && !io.dmem.rvalid) ||
+           (dmem_wr_req && !io.dmem.gnt)
+
   val pc = RegInit(conf.bootAddr - 4.U(conf.xlen.W))
   val next_pc = Wire(UInt(conf.xlen.W))
   pc := next_pc
@@ -56,14 +63,14 @@ class Datapath(conf: Config) extends Module {
     next_pc := pc + 4.U
   }
 
-  val inst = Wire(UInt(32.W))
-  inst := io.imem.rdata
-  when (started || io.ctrl.inst_kill || brCond.io.taken) {
-    inst := Instructions.NOP
-  }
+  val inst = Mux(
+    started || io.ctrl.inst_kill || brCond.io.taken,
+    Instructions.NOP, io.imem.rdata
+  )
 
   io.imem.addr := next_pc
-  io.imem.req := !stall || reset.asBool
+  imem_rd_req := true.B
+  io.imem.req := imem_rd_req
 
   when (!stall) {
     fe_pc := pc
@@ -101,10 +108,14 @@ class Datapath(conf: Config) extends Module {
   brCond.io.rs2 := rs2
   brCond.io.br_type := io.ctrl.br_type
 
-  val daddr = Mux(stall, ew_alu, alu.io.sum) & ~(0x3.U(32.W))
+  val daddr = alu.io.sum & ~(0x3.U(32.W))
   val woffset = (alu.io.sum(1) << 4.U).asUInt | (alu.io.sum(0) << 3.U).asUInt
-  io.dmem.req := !stall && (io.ctrl.st_type =/= StType.none || io.ctrl.ld_type =/= LdType.none)
-  io.dmem.we := !stall && io.ctrl.st_type =/= StType.none
+
+  dmem_rd_req := io.ctrl.ld_type =/= LdType.none
+  dmem_wr_req := io.ctrl.st_type =/= StType.none
+
+  io.dmem.req := dmem_rd_req || dmem_wr_req
+  io.dmem.we := dmem_wr_req
   io.dmem.addr := daddr
   io.dmem.wdata := rs2 << woffset
 

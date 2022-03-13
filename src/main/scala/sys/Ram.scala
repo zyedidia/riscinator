@@ -4,9 +4,6 @@ import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFileInline
 
-import rvcpu.core.DmemIO
-import rvcpu.core.ImemIO
-
 // class Ram(size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
 //   val io = IO(new Bundle{
 //     val imem = Flipped(new ImemIO(addrw, dataw))
@@ -38,9 +35,14 @@ import rvcpu.core.ImemIO
 
 class Ram(size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
   val io = IO(new Bundle{
-    val imem = Flipped(new ImemIO(addrw, dataw))
-    val dmem = Flipped(new DmemIO(addrw, dataw))
+    val imem = Flipped(new bus.InstIO(addrw, dataw))
+    val dmem = Flipped(new bus.DataIO(addrw, dataw))
   })
+
+  io.imem.err := false.B
+  io.dmem.err := false.B
+  io.imem.gnt := io.imem.req
+  io.dmem.gnt := io.dmem.req
 
   val mem = SyncReadMem(size, UInt(dataw.W))
   if (memfile.trim().nonEmpty) {
@@ -50,7 +52,7 @@ class Ram(size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Modul
   val irvalid = RegNext(io.imem.req)
   io.imem.rvalid := irvalid
 
-  val drvalid = RegNext(io.imem.req)
+  val drvalid = RegNext(io.dmem.req)
   io.dmem.rvalid := drvalid
 
   val iaddr = io.imem.addr >> 2
