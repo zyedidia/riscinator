@@ -2,14 +2,12 @@ module wrap
     (
         input wire clk,
         input wire rst_n,
-        input wire rx,
-        output wire tx
+        output wire rgb_led0_r,
     );
 
     `TOP top (
         .clock (clk),
         .reset (!rst_n),
-        .io_rx (rx),
-        .io_tx (tx)
+        .io_led (rgb_led0_r)
     );
 endmodule

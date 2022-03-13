@@ -1,4 +1,4 @@
-TOP ?= Cpu
+TOP ?= Soc
 TECH ?= orangecrab
 
 SBT=sbt --client

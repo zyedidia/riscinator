@@ -27,7 +27,7 @@ class Soc extends Module {
 
   val bus = Module(new SimpleBus(1, xlen, xlen, devBase, devMask))
 
-  val ram = Module(new Ram(log2Ceil(ramStart), ramSize, xlen, xlen, "./mem/riscvtest.hex"))
+  val ram = Module(new Ram(log2Ceil(ramStart), ramSize / 4, xlen, xlen, "./mem/riscvtest.hex"))
 
   core.io.imem <> ram.io.imem
   core.io.dmem <> bus.io.host(0)

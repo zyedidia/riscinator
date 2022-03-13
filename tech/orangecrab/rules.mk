@@ -1,5 +1,5 @@
-CONS=boards/orangecrab/orangecrab.lpf
-WRAP=boards/orangecrab/wrap.v
+CONS=tech/orangecrab/orangecrab.lpf
+WRAP=tech/orangecrab/wrap.v
 REPORT=report.json
 
 BOARDCLEAN=rm -f *.dfu *.bit *.json *_out.config $(REPORT)
