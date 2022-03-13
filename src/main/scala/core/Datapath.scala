@@ -4,8 +4,8 @@ import chisel3._
 import chisel3.util._
 
 class DatapathIO(xlen: Int) extends Bundle {
-  val imem = new bus.InstIO(xlen, xlen)
-  val dmem = new bus.DataIO(xlen, xlen)
+  val imem = new ImemIO(xlen, xlen)
+  val dmem = new DmemIO(xlen, xlen)
   val ctrl = Flipped(new ControlIO)
 }
 
@@ -56,7 +56,7 @@ class Datapath(conf: Config) extends Module {
   when (stall) {
     next_pc := pc
   } .elsewhen (io.ctrl.pc_sel === PcSel.alu || brCond.io.taken) {
-    next_pc := alu.io.sum & ~(0x1.U(32.W))
+    next_pc := alu.io.sum & ~(0x1.U(conf.xlen.W))
   } .elsewhen (io.ctrl.pc_sel === PcSel.plus0) {
     next_pc := pc
   } .otherwise {
@@ -108,7 +108,7 @@ class Datapath(conf: Config) extends Module {
   brCond.io.rs2 := rs2
   brCond.io.br_type := io.ctrl.br_type
 
-  val daddr = alu.io.sum & ~(0x3.U(32.W))
+  val daddr = alu.io.sum & ~(0x3.U(conf.xlen.W))
   val woffset = (alu.io.sum(1) << 4.U).asUInt | (alu.io.sum(0) << 3.U).asUInt
 
   dmem_rd_req := io.ctrl.ld_type =/= LdType.none

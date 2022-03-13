@@ -3,7 +3,7 @@ package bus
 import chisel3._
 import chisel3.util._
 
-class InstIO(addrw: Int, dataw: Int) extends Bundle {
+class RoIO(addrw: Int, dataw: Int) extends Bundle {
   val req = Output(Bool())
   val addr = Output(UInt(addrw.W))
   val gnt = Input(Bool())
@@ -12,7 +12,7 @@ class InstIO(addrw: Int, dataw: Int) extends Bundle {
   val rdata = Input(UInt(dataw.W))
 }
 
-class DataIO(addrw: Int, dataw: Int) extends Bundle {
+class RwIO(addrw: Int, dataw: Int) extends Bundle {
   val req = Output(Bool())
   val addr = Output(UInt(addrw.W))
   val we = Output(Bool())
