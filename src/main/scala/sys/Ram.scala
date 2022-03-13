@@ -34,7 +34,7 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
   val write = (0 until (dataw / 8)).foldLeft(0.U(dataw.W)) { (write, i) =>
     write |
     (Mux(
-      (io.dmem.req && io.dmem.be(i)),
+      io.dmem.req && io.dmem.be(i),
       io.dmem.wdata,
       mem(daddr)
     )(8 * (i + 1) - 1, 8 * i) << (8 * i).U).asUInt
