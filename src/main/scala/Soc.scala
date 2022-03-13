@@ -6,18 +6,32 @@ import chisel3.util._
 import rvcpu.core._
 import rvcpu.sys._
 
-class Soc extends Module {
-  val xlen = 32
+import bus._
 
+class Soc extends Module {
   val io = IO(new Bundle{
     val led = Output(Bool())
   })
 
-  val core = Module(new Core(Config(xlen, 0x0000.U)))
-  val ram = Module(new Ram(1024, xlen, xlen, "./mem/riscvtest.hex"))
+  val xlen = 32
+  val ramStart = 0x100000
+  val ramSize = 16 * 1024;
+  val ramMask = (ramSize - 1).U(xlen.W);
+  val bootAddr = ramStart.U(xlen.W)
+
+  val core = Module(new Core(Config(xlen, bootAddr)))
+
+  val devRam = 0
+  val devBase = List(ramStart.U(xlen.W))
+  val devMask = List(ramMask)
+
+  val bus = Module(new SimpleBus(1, xlen, xlen, devBase, devMask))
+
+  val ram = Module(new Ram(log2Ceil(ramStart), ramSize, xlen, xlen, "./mem/riscvtest.hex"))
 
   core.io.imem <> ram.io.imem
-  core.io.dmem <> ram.io.dmem
+  core.io.dmem <> bus.io.host(0)
+  ram.io.dmem <> bus.io.dev(devRam)
 
   io.led := core.io.dmem.req
 }
