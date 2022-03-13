@@ -119,9 +119,8 @@ class Datapath(conf: Config) extends Module {
   io.dmem.addr := daddr
   io.dmem.wdata := rs2 << woffset
 
-  io.dmem.be := 0.U
+  io.dmem.be := "b1111".U
   switch (Mux(stall, st_type, io.ctrl.st_type)) {
-    is (StType.sw) { io.dmem.be := "b1111".U }
     is (StType.sh) { io.dmem.be := "b11".U << alu.io.sum(1, 0) }
     is (StType.sb) { io.dmem.be := "b1".U << alu.io.sum(1, 0)  }
   }
