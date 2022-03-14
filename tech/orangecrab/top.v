@@ -1,4 +1,4 @@
-module wrap
+module top
     (
         input wire clk,
         input wire rst_n,
