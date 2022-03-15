@@ -4,9 +4,8 @@ import chisel3._
 import chisel3.util._
 
 import rvcpu.core._
-import rvcpu.sys._
-
-import bus._
+import rvcpu.bus._
+import rvcpu.sys.ram._
 
 class Soc extends Module {
   val io = IO(new Bundle{

@@ -1,13 +1,15 @@
-package rvcpu.sys
+package rvcpu.sys.ram
 
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFileInline
 
+import rvcpu.bus._
+
 class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
   val io = IO(new Bundle{
-    val imem = Flipped(new bus.RoIO(addrw, dataw))
-    val dmem = Flipped(new bus.RwIO(addrw, dataw))
+    val imem = Flipped(new RoIO(addrw, dataw))
+    val dmem = Flipped(new RwIO(addrw, dataw))
   })
 
   io.imem.err := false.B
