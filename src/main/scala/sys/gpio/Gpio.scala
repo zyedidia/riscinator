@@ -1,4 +1,4 @@
-package rvcpu.sys
+package rvcpu.sys.gpio
 
 import chisel3._
 import chisel3.util._
@@ -44,7 +44,7 @@ class Gpio(nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
       io.bus.err := false.B
       io.bus.rdata := inVal
     }
-    is (Mmio.inVal.U) {
+    is (Mmio.outVal.U) {
       io.bus.err := false.B
       io.bus.rdata := outVal
     }
