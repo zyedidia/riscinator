@@ -9,7 +9,7 @@ class SocSim extends AnyFlatSpec with ChiselScalatestTester {
     test(new rvcpu.Soc).withAnnotations(Seq(treadle.WriteVcdAnnotation, treadle.MemoryToVCD("all"))) { dut =>
       for (i <- 1 to 5) {
         dut.io.gpi(0).poke(i % 2 == 0)
-        for (j <- 1 to 100) {
+        for (j <- 1 to 1000) {
           dut.clock.step()
         }
       }

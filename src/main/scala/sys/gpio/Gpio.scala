@@ -5,7 +5,7 @@ import chisel3.util._
 
 import rvcpu.bus._
 
-object Mmio {
+object RegMap {
   val inVal = 0x0
   val outVal = 0x4
 }
@@ -18,7 +18,6 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
     val gpo = Vec(nOut, Output(Bool()))
   })
 
-  io.bus.err := false.B
   io.bus.gnt := io.bus.req
 
   val we = io.bus.req && io.bus.we
@@ -35,16 +34,16 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
   }
 
   val inVal = RegNext(io.gpi.asUInt, 0.U)
-  val outVal = wReg(Mmio.outVal.U, nOut)
+  val outVal = wReg(RegMap.outVal.U, nOut)
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
   switch (io.bus.addr(offset, 0)) {
-    is (Mmio.inVal.U) {
+    is (RegMap.inVal.U) {
       io.bus.err := false.B
       io.bus.rdata := inVal
     }
-    is (Mmio.outVal.U) {
+    is (RegMap.outVal.U) {
       io.bus.err := false.B
       io.bus.rdata := outVal
     }

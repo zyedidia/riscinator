@@ -44,5 +44,4 @@ ucli.key
 *.out
 *.o
 
-mem/*.hex
-
+*.hex

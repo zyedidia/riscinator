@@ -6,7 +6,7 @@ typedef struct {
     unsigned gpo_val;
 } gpio_reg_t;
 
-static volatile gpio_reg_t* const gpio = (gpio_reg_t*) 0x10000;
+static volatile gpio_reg_t* const gpio = (gpio_reg_t*) 0x20000;
 
 void gpo_write(gpo_pin_t pin, unsigned val) {
     gpio->gpo_val = bit_assign(gpio->gpo_val, pin, val);

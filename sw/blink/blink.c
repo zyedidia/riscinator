@@ -2,9 +2,11 @@
 
 int main() {
     const int led = GPO_LED_R;
-    const int btn = GPI_BTN;
 
+    unsigned val = 0;
     while (1) {
-        gpo_write(led, gpi_read(btn));
+        gpo_write(led, val);
+        val = !val;
+        delay_ms(500);
     }
 }

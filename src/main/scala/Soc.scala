@@ -7,46 +7,69 @@ import rvcpu.core._
 import rvcpu.bus._
 import rvcpu.sys.ram._
 import rvcpu.sys.gpio._
+import rvcpu.sys.timer._
 
-case class Dev(idx: Int, base: Int, size: Int) {
+import scala.collection.mutable.ListBuffer
+
+case class Device(base: Int, size: Int, busIO: (Int, Int) => RwIO) {
   def mask: Int = {
     return size - 1
   }
 }
 
-object DevMap {
-  val ram = Dev(0, 0x100000, 16 * 1024)
-  val gpio = Dev(1, 0x10000, 1024)
+object Mmio {
+  val RamBase = 0x100000
+  val RamSize = 16 * 1024
+  val TimerBase = 0x10000
+  val TimerSize = 1024
+  val GpioBase = 0x20000
+  val GpioSize = 1024
 }
 
 class Soc extends Module {
+  val memFile = "./mem/blink.hex"
+  val xlen = 32
+
   val io = IO(new Bundle{
     val gpi = Vec(1, Input(Bool()))
     val gpo = Vec(1, Output(Bool()))
   })
 
-  val xlen = 32
-  val bootAddr = DevMap.ram.base.U(xlen.W)
+  val boot = Mmio.RamBase.U(xlen.W)
+  val core = Module(new Core(Config(xlen, boot)))
 
-  val core = Module(new Core(Config(xlen, bootAddr)))
+  val devices = List(
+    Device(Mmio.RamBase, Mmio.RamSize, (base: Int, size: Int) => {
+      val ram = Module(new Ram(log2Ceil(base)-1, size / 4, xlen, xlen, memFile))
+      core.io.imem <> ram.io.imem
 
-  val bus = Module(
-    new SimpleBus(
-      1, xlen, xlen,
-      List(DevMap.ram.base.U(xlen.W), DevMap.gpio.base.U(xlen.W)),
-      List(DevMap.ram.mask.U(xlen.W), DevMap.gpio.mask.U(xlen.W))
-    )
+      ram.io.dmem
+    }),
+    Device(Mmio.TimerBase, Mmio.TimerSize, (base: Int, size: Int) => {
+      val timer = Module(new Timer(log2Ceil(base)-1, xlen, xlen))
+      timer.io.bus
+    }),
+    Device(Mmio.GpioBase, Mmio.GpioSize, (base: Int, size: Int) => {
+      val gpio = Module(new Gpio(log2Ceil(base)-1, 1, 1, xlen, xlen))
+      gpio.io.gpo <> io.gpo
+      gpio.io.gpi <> io.gpi
+
+      gpio.io.bus
+    })
   )
 
-  val ram = Module(new Ram(log2Ceil(DevMap.ram.base)-1, DevMap.ram.size / 4, xlen, xlen, "./mem/blink.hex"))
-  val gpio = Module(new Gpio(log2Ceil(DevMap.gpio.base)-1, 1, 1, xlen, xlen))
-  gpio.io.gpo <> io.gpo
-  gpio.io.gpi <> io.gpi
+  var devs = new ListBuffer[BaseMask]()
+  for (dev <- devices) {
+    devs += BaseMask(dev.base.U(xlen.W), dev.mask.U(xlen.W))
+  }
 
-  core.io.imem <> ram.io.imem
+  val bus = Module(new SimpleBus(1, xlen, xlen, devs.toList))
   core.io.dmem <> bus.io.host(0)
-  bus.io.dev(DevMap.ram.idx) <> ram.io.dmem
-  bus.io.dev(DevMap.gpio.idx) <> gpio.io.bus
+
+  for (i <- devices.indices) {
+    val dev = devices(i)
+    bus.io.dev(i) <> dev.busIO(dev.base, dev.size)
+  }
 }
 
 object Soc extends App {

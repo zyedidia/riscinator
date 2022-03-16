@@ -35,6 +35,7 @@ class Datapath(conf: Config) extends Module {
   val wb_en = Reg(Bool())
   val illegal = Reg(Bool())
   val pc_check = Reg(Bool())
+  val wb_ld = Reg(UInt(conf.xlen.W))
 
   import Control._
 
@@ -125,18 +126,6 @@ class Datapath(conf: Config) extends Module {
     is (StType.sb) { io.dmem.be := "b1".U << alu.io.sum(1, 0)  }
   }
 
-  when (!stall) {
-    ew_pc := fe_pc
-    ew_inst := fe_inst
-    ew_alu := alu.io.out
-    st_type := io.ctrl.st_type
-    ld_type := io.ctrl.ld_type
-    wb_sel := io.ctrl.wb_sel
-    wb_en := io.ctrl.wb_en
-    illegal := io.ctrl.illegal
-    pc_check := io.ctrl.pc_sel === PcSel.alu
-  }
-
   val ldoff = (ew_alu(1) << 4.U).asUInt | (ew_alu(0) << 3.U).asUInt
   val ldshift = io.dmem.rdata >> ldoff
   val ld = Wire(SInt(conf.xlen.W))
@@ -149,12 +138,25 @@ class Datapath(conf: Config) extends Module {
     is (LdType.lbu) { ld := ldshift(7, 0).zext }
   }
 
+  when (!stall) {
+    ew_pc := fe_pc
+    ew_inst := fe_inst
+    ew_alu := alu.io.out
+    wb_ld := ld.asUInt
+    st_type := io.ctrl.st_type
+    ld_type := io.ctrl.ld_type
+    wb_sel := io.ctrl.wb_sel
+    wb_en := io.ctrl.wb_en
+    illegal := io.ctrl.illegal
+    pc_check := io.ctrl.pc_sel === PcSel.alu
+  }
+
   // Writeback stage
   val regwr = Wire(UInt(conf.xlen.W))
 
   regwr := ew_alu.zext.asUInt
   switch (wb_sel) {
-    is (WbSel.mem) { regwr := ld.asUInt }
+    is (WbSel.mem) { regwr := wb_ld }
     is (WbSel.pc4) { regwr := ew_pc + 4.U }
   }
 

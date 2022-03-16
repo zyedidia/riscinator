@@ -24,6 +24,8 @@ class RwIO(addrw: Int, dataw: Int) extends Bundle {
   val rdata = Input(UInt(dataw.W))
 }
 
+case class BaseMask(base: UInt, mask: UInt)
+
 // Simple bus that doesn't handle the full bus protocol:
 // - All devices must respond in the next cycle after the request.
 // - Host arbitration is strictly priority based.
@@ -33,10 +35,9 @@ class SimpleBus(
   nHost: Int,
   addrw: Int,
   dataw: Int,
-  devBase: List[UInt],
-  devMask: List[UInt]
+  devs: List[BaseMask]
 ) extends Module {
-  val nDev = devBase.length
+  val nDev = devs.length
 
   val io = IO(new Bundle{
     val host = Vec(nHost, Flipped(new RwIO(addrw, dataw)))
@@ -61,7 +62,7 @@ class SimpleBus(
   // Device select
   devSelReq := 0.U
   for (dev <- 0 until nDev) {
-    when ((io.host(hostSelReq).addr & ~devMask(dev)) === devBase(dev)) {
+    when ((io.host(hostSelReq).addr & ~devs(dev).mask) === devs(dev).base) {
       devSelReq := dev.U
     }
   }
