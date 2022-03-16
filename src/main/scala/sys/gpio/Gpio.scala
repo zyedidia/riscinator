@@ -10,7 +10,7 @@ object Mmio {
   val outVal = 0x4
 }
 
-class Gpio(nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
+class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
   val io = IO(new Bundle{
     val bus = Flipped(new RwIO(addrw, dataw))
 
@@ -25,7 +25,7 @@ class Gpio(nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
 
   def wReg(addr: UInt, width: Int): UInt = {
     val reg = RegInit(0.U(width.W))
-    val rwe = we && (io.bus.addr === addr)
+    val rwe = we && (io.bus.addr(offset, 0) === addr)
 
     when (rwe) {
       reg := io.bus.wdata
@@ -39,7 +39,7 @@ class Gpio(nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
-  switch (io.bus.addr) {
+  switch (io.bus.addr(offset, 0)) {
     is (Mmio.inVal.U) {
       io.bus.err := false.B
       io.bus.rdata := inVal

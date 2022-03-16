@@ -44,13 +44,13 @@ class SimpleBus(
   })
 
   val hostSelBits = if (nHost > 1) log2Ceil(nHost) else 1
-  val devSelBits = if (nHost > 1) log2Ceil(nHost) else 1
+  val devSelBits = if (nDev > 1) log2Ceil(nDev) else 1
 
   val hostSelReq = Wire(UInt(hostSelBits.W))
 
   // Host select
   hostSelReq := 0.U
-  for (host <- (nHost - 1 to 0).reverse) {
+  for (host <- (0 until nHost).reverse) {
     when (io.host(host).req) {
       hostSelReq := host.U
     }
@@ -60,8 +60,8 @@ class SimpleBus(
 
   // Device select
   devSelReq := 0.U
-  for (dev <- 0 to (nDev - 1)) {
-    when ((io.host(hostSelReq).addr & devMask(dev)) === devBase(dev)) {
+  for (dev <- 0 until nDev) {
+    when ((io.host(hostSelReq).addr & ~devMask(dev)) === devBase(dev)) {
       devSelReq := dev.U
     }
   }
@@ -70,7 +70,7 @@ class SimpleBus(
   val hostSelResp = RegNext(hostSelReq, 0.U)
   val devSelResp = RegNext(devSelReq, 0.U)
 
-  for (dev <- 0 to (nDev - 1)) {
+  for (dev <- 0 until nDev) {
     when (dev.U === devSelReq) {
       io.dev(dev).req := io.host(hostSelReq).req
       io.dev(dev).we := io.host(hostSelReq).we
@@ -86,7 +86,7 @@ class SimpleBus(
     }
   }
 
-  for (host <- 0 to (nHost - 1)) {
+  for (host <- 0 until nHost) {
     io.host(host).gnt := false.B
     when (host.U === hostSelResp) {
       io.host(host).rvalid := io.dev(devSelResp).rvalid

@@ -38,8 +38,8 @@ class Soc extends Module {
     )
   )
 
-  val ram = Module(new Ram(log2Ceil(DevMap.ram.base), DevMap.ram.size / 4, xlen, xlen, "./mem/riscvtest.hex"))
-  val gpio = Module(new Gpio(1, 1, xlen, xlen))
+  val ram = Module(new Ram(log2Ceil(DevMap.ram.base)-1, DevMap.ram.size / 4, xlen, xlen, "./mem/blink.hex"))
+  val gpio = Module(new Gpio(log2Ceil(DevMap.gpio.base)-1, 1, 1, xlen, xlen))
   gpio.io.gpo <> io.gpo
   gpio.io.gpi <> io.gpi
 

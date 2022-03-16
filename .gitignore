@@ -42,3 +42,7 @@ ucli.key
 *.dfu
 *.list
 *.out
+*.o
+
+mem/*.hex
+
