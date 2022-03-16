@@ -1,3 +1,3 @@
 #pragma once
 
-#define CLK_FREQ_MHZ 48
+#define CLK_FREQ_MHZ 36

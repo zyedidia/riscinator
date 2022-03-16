@@ -3,6 +3,8 @@ package rvcpu.sys.ram
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.loadMemoryFromFileInline
+import chisel3.experimental.{annotate, ChiselAnnotation}
+import firrtl.annotations.MemorySynthInit
 
 import rvcpu.bus._
 
@@ -10,6 +12,11 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
   val io = IO(new Bundle{
     val imem = Flipped(new RoIO(addrw, dataw))
     val dmem = Flipped(new RwIO(addrw, dataw))
+  })
+
+  annotate(new ChiselAnnotation {
+    override def toFirrtl =
+      MemorySynthInit
   })
 
   io.imem.err := false.B
