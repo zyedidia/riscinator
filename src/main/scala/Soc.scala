@@ -32,7 +32,7 @@ class Soc extends Module {
 
   val io = IO(new Bundle{
     val gpi = Vec(1, Input(Bool()))
-    val gpo = Vec(1, Output(Bool()))
+    val gpo = Vec(3, Output(Bool()))
   })
 
   val boot = Mmio.RamBase.U(xlen.W)
@@ -50,7 +50,7 @@ class Soc extends Module {
       timer.io.bus
     }),
     Device(Mmio.GpioBase, Mmio.GpioSize, (base: Int, size: Int) => {
-      val gpio = Module(new Gpio(log2Ceil(base)-1, 1, 1, xlen, xlen))
+      val gpio = Module(new Gpio(log2Ceil(base)-1, 1, 3, xlen, xlen))
       gpio.io.gpo <> io.gpo
       gpio.io.gpi <> io.gpi
 
