@@ -45,3 +45,4 @@ ucli.key
 *.o
 
 *.hex
+*.fir

@@ -26,8 +26,7 @@ object Mmio {
   val GpioSize = 1024
 }
 
-class Soc extends Module {
-  val memFile = "./mem/blink.hex"
+class Soc(memFile: String) extends Module {
   val xlen = 32
 
   val io = IO(new Bundle{
@@ -73,5 +72,5 @@ class Soc extends Module {
 }
 
 object Soc extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Soc, Array("--target-dir", "generated"))
+  (new chisel3.stage.ChiselStage).emitVerilog(new Soc("mem/blink.hex"), Array("--target-dir", "generated"))
 }

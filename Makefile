@@ -12,10 +12,10 @@ generated/$(TOP).v: $(SRC)
 	$(SBT) run
 
 test: $(SRC) $(TEST)
-	$(SBT) test
+	$(SBT) "testOnly test.core.CoreTest"
 
 sim: $(SRC) $(TEST)
-	$(SBT) "testOnly test.$(TOP)SimTest"
+	$(SBT) "testOnly test.$(TOP)Sim"
 
 include tech/$(TECH)/rules.mk
 
