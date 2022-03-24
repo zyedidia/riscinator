@@ -8,6 +8,9 @@ TEST=$(shell find ./src/test/scala -name "*.scala")
 
 build: generated/$(TOP).v
 
+check: $(SRC) $(TEST)
+	$(SBT) compile
+
 generated/$(TOP).v: $(SRC)
 	$(SBT) run
 
