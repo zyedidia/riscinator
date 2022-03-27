@@ -91,12 +91,14 @@ object TrapCause {
 }
 
 class CsrIO(xlen: Int) extends Bundle {
-  val addr = Input(UInt(12.W))
+  val cmd = Input(CsrType())
+  val csr_addr = Input(UInt(12.W))
   val rdata = Output(UInt(xlen.W))
   val pc = Input(UInt(xlen.W))
   val st_type = Input(StType())
   val ld_type = Input(LdType())
   val epc = Output(UInt(xlen.W))
+  val exc = Output(Bool())
 }
 
 class McauseDat(xlen: Int) extends Bundle {
@@ -184,5 +186,5 @@ class Csr(xlen: Int) extends Module {
     Csr.mip -> mip
   )
 
-  io.rdata := MuxLookup(io.addr, 0.U, regs)
+  io.rdata := MuxLookup(io.csr_addr, 0.U, regs)
 }
