@@ -7,7 +7,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 class SocSim extends AnyFlatSpec with ChiselScalatestTester {
   "Soc" should "simulate" in {
     test(
-      new rvcpu.Soc("./mem/blink.hex")
+      new rvcpu.Soc("./mem/lights.hex")
     ).withAnnotations(Seq(
       treadle.WriteVcdAnnotation,
       treadle.MemoryToVCD("all")

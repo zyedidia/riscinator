@@ -31,7 +31,7 @@ class Soc(memFile: String) extends Module {
 
   val io = IO(new Bundle{
     val gpi = Vec(1, Input(Bool()))
-    val gpo = Vec(3, Output(Bool()))
+    val gpo = Vec(7, Output(Bool()))
   })
 
   val boot = Mmio.RamBase.U(xlen.W)
@@ -49,7 +49,7 @@ class Soc(memFile: String) extends Module {
       timer.io.bus
     }),
     Device(Mmio.GpioBase, Mmio.GpioSize, (base: Int, size: Int) => {
-      val gpio = Module(new Gpio(log2Ceil(base)-1, 1, 3, xlen, xlen))
+      val gpio = Module(new Gpio(log2Ceil(base)-1, 1, 7, xlen, xlen))
       gpio.io.gpo <> io.gpo
       gpio.io.gpi <> io.gpi
 
@@ -72,5 +72,5 @@ class Soc(memFile: String) extends Module {
 }
 
 object Soc extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Soc("mem/blink.hex"), Array("--target-dir", "generated"))
+  (new chisel3.stage.ChiselStage).emitVerilog(new Soc("mem/lights.hex"), Array("--target-dir", "generated"))
 }

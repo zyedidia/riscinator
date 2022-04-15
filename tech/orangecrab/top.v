@@ -5,7 +5,11 @@ module top
         input wire usr_btn_i,
         output wire rgb_led0_r,
         output wire rgb_led0_g,
-        output wire rgb_led0_b
+        output wire rgb_led0_b,
+        output wire gpio_0,
+        output wire gpio_1,
+        output wire gpio_2,
+        output wire gpio_3
     );
 
     assign rgb_led0_g = 1'b1;
@@ -46,6 +50,10 @@ module top
         .io_gpi_0 (usr_btn_i),
         .io_gpo_0 (led_r),
         .io_gpo_1 (led_g),
-        .io_gpo_2 (led_b)
+        .io_gpo_2 (led_b),
+        .io_gpo_3 (gpio_0),
+        .io_gpo_4 (gpio_1),
+        .io_gpo_5 (gpio_2),
+        .io_gpo_6 (gpio_3)
     );
 endmodule

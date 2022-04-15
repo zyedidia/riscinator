@@ -1,5 +1,5 @@
 CLKIN=48
-CLKOUT=36
+CLKOUT=100
 
 pll.v:
 	ecppll --clkin $(CLKIN) -o $(CLKOUT) -f $@
