@@ -24,7 +24,7 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
   io.imem.gnt := io.imem.req
   io.dmem.gnt := io.dmem.req
 
-  val mem = SyncReadMem(size, UInt(dataw.W))
+  val mem = SyncReadMem(size / 4, UInt(dataw.W))
   if (memfile.trim().nonEmpty) {
     loadMemoryFromFileInline(mem, memfile)
   }
