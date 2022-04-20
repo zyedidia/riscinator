@@ -1,5 +1,5 @@
 CONS=tech/upduino/upduino.pcf
-WRAP=tech/upduino/top.v
+WRAP=tech/upduino/top.v tech/upduino/pll.v
 REPORT=report.json
 
 BOARDCLEAN=rm -f *.bin *.json *.asc $(REPORT)

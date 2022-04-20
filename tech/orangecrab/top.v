@@ -12,9 +12,6 @@ module top
         output wire gpio_3
     );
 
-    assign rgb_led0_g = 1'b1;
-    assign rgb_led0_b = 1'b1;
-
     logic locked;
     logic clk_sys;
     logic rst_sys_n;
