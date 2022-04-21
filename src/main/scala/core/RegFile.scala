@@ -22,6 +22,12 @@ class RegFile(size: Int, width: Int) extends Module {
 
   io.rdata1 := regs(io.raddr1)
   io.rdata2 := regs(io.raddr2)
+  when (io.raddr1 === io.waddr && io.wen) {
+    io.rdata1 := io.wdata
+  }
+  when (io.raddr2 === io.waddr && io.wen) {
+    io.rdata2 := io.wdata
+  }
 
   when (io.wen && io.waddr =/= 0.U(width.W)) {
     regs(io.waddr) := io.wdata

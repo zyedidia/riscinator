@@ -72,5 +72,5 @@ class Soc(memFile: String) extends Module {
 }
 
 object Soc extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new Soc("mem/lights.hex"), Array("--target-dir", "generated"))
+  (new chisel3.stage.ChiselStage).emitVerilog(new Soc("mem/riscvtest.hex"), Array("--target-dir", "generated"))
 }

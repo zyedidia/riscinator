@@ -13,7 +13,6 @@ class AluIO(width: Int) extends Bundle {
   val b = Input(UInt(width.W))
   val op = Input(AluOp())
   val out = Output(UInt(width.W))
-  val sum = Output(UInt(width.W))
 }
 
 class Alu(width: Int) extends Module {
@@ -28,11 +27,12 @@ class Alu(width: Int) extends Module {
   when (io.op === AluOp.sub) {
     b := -io.b
   }
-  io.sum := io.a + b
+  val sum = Wire(UInt(width.W))
+  sum := io.a + b
 
   switch (io.op) {
-    is (AluOp.add)   { io.out := io.sum }
-    is (AluOp.sub)   { io.out := io.sum }
+    is (AluOp.add)   { io.out := sum }
+    is (AluOp.sub)   { io.out := sum }
     is (AluOp.and)   { io.out := io.a & io.b }
     is (AluOp.or)    { io.out := io.a | io.b }
     is (AluOp.xor)   { io.out := io.a ^ io.b }
