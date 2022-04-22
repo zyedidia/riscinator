@@ -158,18 +158,25 @@ class Core(conf: Config) extends Module {
   fetch.io.alu_out := alu_out_m
   fetch.io.ctrl.stall := stall || stall_all
 
-  when (rs1_e === rd_m) {
+  when (rs1_e =/= 0.U && rs1_e === rd_m && wb_en_m) {
     execute.io.data.rs1r := alu_out_m
-  } .elsewhen (rs1_e === rd_w) {
-    execute.io.data.rs1r := alu_out_w
+  } .elsewhen (rs1_e =/= 0.U && rs1_e === rd_w && wb_en_w) {
+    when (ld_type_w === LdType.none) {
+      execute.io.data.rs1r := alu_out_w
+    } .otherwise {
+      execute.io.data.rs1r := ld_w
+    }
   }
-  when (rs2_e === rd_m) {
+  when (rs2_e =/= 0.U && rs2_e === rd_m && wb_en_m) {
     execute.io.data.rs2r := alu_out_m
-  } .elsewhen (rs2_e === rd_w) {
-    execute.io.data.rs2r := alu_out_w
+  } .elsewhen (rs2_e =/= 0.U && rs2_e === rd_w && wb_en_w) {
+    when (ld_type_w === LdType.none) {
+      execute.io.data.rs2r := alu_out_w
+    } .otherwise {
+      execute.io.data.rs2r := ld_w
+    }
   }
 
-  // TODO: don't stall every register
   when (ld_type_e =/= LdType.none && (rd_e === decode.io.data.rs1 || rd_e === decode.io.data.rs2)) {
     stall := true.B
     flush := true.B
