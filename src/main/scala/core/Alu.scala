@@ -20,6 +20,7 @@ class Alu(width: Int) extends Module {
 
   val shamt = io.b(4, 0)
 
+  // TODO: optimize alu
   io.out := io.a
 
   val b = Wire(UInt(width.W))

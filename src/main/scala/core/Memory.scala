@@ -34,7 +34,7 @@ class Memory(xlen: Int) extends Module {
   io.dmem.we := dmem_wr_req
   io.dmem.addr := daddr
   io.dmem.wdata := io.data.rs2 << woffset
-  // TODO: stall if not rvalid
+  // TODO: stall if not rvalid (stall in writeback stage if this is a load)
   io.data.stall := dmem_wr_req && !io.dmem.gnt || dmem_rd_req && !io.dmem.gnt
 
   io.dmem.be := "b1111".U
