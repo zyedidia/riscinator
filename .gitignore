@@ -1,18 +1,8 @@
 generated
-outputs
-test_run_dir
 target
 project/target
-*.key
-*.log
-*.swp
-.ivy2
-VTile
-dump.vcd*
-DVEfiles
-riscv-tools-priv1.7
-tests/32/*
-tests/64/*
+test_run_dir
+.bsp
 
 # Scala IDEs
 .project
@@ -22,27 +12,10 @@ tests/64/*
 *.iml
 /*.bsp/
 
-# Visual Studio Code
 .bloop/
 .metals/
 .vscode/
 
-# Synopsys Verdi
-novas_dump.log
-ucli.key
+*.swp
 
-*.asc
-*.bin
-*.json
 .DS_Store
-*.dSYM
-*.elf
-*_out.config
-*.bit
-*.dfu
-*.list
-*.out
-*.o
-
-*.hex
-*.fir

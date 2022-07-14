@@ -1,6 +1,4 @@
-TOP ?= Soc
-TECH ?= orangecrab
-
+TOP=Soc
 SBT=sbt --client
 
 SRC=$(shell find ./src/main/scala -name "*.scala")
@@ -8,21 +6,22 @@ TEST=$(shell find ./src/test/scala -name "*.scala")
 
 build: generated/$(TOP).v
 
-check: $(SRC) $(TEST)
+check:
 	$(SBT) compile
 
-generated/$(TOP).v: $(SRC)
+generated:
+	mkdir -p generated
+
+generated/$(TOP).v: $(SRC) generated
 	$(SBT) run
 
-test: $(SRC) $(TEST)
-	$(SBT) "testOnly test.core.CoreTest"
+test:
+	$(SBT) "Test / test"
 
-sim: $(SRC) $(TEST)
-	$(SBT) "testOnly test.$(TOP)Sim"
-
-include tech/$(TECH)/rules.mk
+format:
+	$(SBT) scalafmtAll
 
 clean:
 	rm -rf generated
-	$(BOARDCLEAN)
 
+.PHONY: build check test clean
