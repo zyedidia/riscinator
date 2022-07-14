@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util._
 
 class RegFileIO(size: Int, width: Int) extends Bundle {
-  private val addrw = log2Ceil(size)
+  val addrw = log2Ceil(size)
 
   val wen = Input(Bool())
   val raddr1 = Input(UInt(addrw.W))
@@ -22,12 +22,6 @@ class RegFile(size: Int, width: Int) extends Module {
 
   io.rdata1 := regs(io.raddr1)
   io.rdata2 := regs(io.raddr2)
-  when(io.raddr1 === io.waddr && io.wen) {
-    io.rdata1 := io.wdata
-  }
-  when(io.raddr2 === io.waddr && io.wen) {
-    io.rdata2 := io.wdata
-  }
 
   when(io.wen && io.waddr =/= 0.U(width.W)) {
     regs(io.waddr) := io.wdata

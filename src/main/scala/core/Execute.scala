@@ -56,7 +56,6 @@ class Execute(xlen: Int, rlen: Int) extends Module {
     is (ImmSel.z) { sint := inst(19, 15).zext }
   }
 
-
   val alu = Module(new Alu(xlen))
   io.data.alu_out := alu.io.out
   alu.io.op := io.ctrl.alu_op

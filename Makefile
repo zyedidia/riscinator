@@ -1,5 +1,6 @@
 TOP=Soc
 SBT=sbt --client
+MEM=mem/riscvtest.hex
 
 SRC=$(shell find ./src/main/scala -name "*.scala")
 TEST=$(shell find ./src/test/scala -name "*.scala")
@@ -13,9 +14,10 @@ generated:
 	mkdir -p generated
 
 generated/$(TOP).v: $(SRC) generated
-	$(SBT) run
+	$(SBT) run $(MEM)
 
 test:
+	$(MAKE) -C tests
 	$(SBT) "Test / test"
 
 format:

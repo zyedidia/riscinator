@@ -3,6 +3,7 @@ target
 project/target
 test_run_dir
 .bsp
+*.hex
 
 # Scala IDEs
 .project
