@@ -19,7 +19,7 @@ generated/$(TOP).v generated/$(TOP).fir: $(SRC) generated
 	$(SBT) run $(MEM)
 
 generated/$(TOP).mfc.v: generated/$(TOP).fir
-	firtool -o $@ $< --disable-annotation-unknown --annotation-file=generated/$(TOP).anno.json --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
+	firtool -o $@ $< --disable-annotation-unknown --annotation-file=generated/$(TOP).anno.json --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables --imconstprop --imdeadcodeelim --inline --dedup --preserve-values=none
 
 test:
 	$(MAKE) -C tests
