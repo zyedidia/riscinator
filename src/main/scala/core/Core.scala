@@ -107,4 +107,15 @@ class Core(conf: Config) extends Module {
   fetch.io.ctrl.pc_sel := control.io.pc_sel
   fetch.io.alu_out := execute.io.data.alu_out
   fetch.io.ctrl.stall := stall
+
+  // if an instruction tries to read from an rs1/rs2 while the previous
+  // instruction is still writing it back, forward it from the ALU
+  val rs1hzd = control.io.wb_en && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === rd_w
+  when (control.io.wb_sel === WbSel.alu && rs1hzd) {
+    execute.io.rf.rs1r := alu_out_w
+  }
+  val rs2hzd = control.io.wb_en && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === rd_w
+  when (control.io.wb_sel === WbSel.alu && rs2hzd) {
+    execute.io.rf.rs2r := alu_out_w
+  }
 }
