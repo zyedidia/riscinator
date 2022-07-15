@@ -63,8 +63,7 @@ class Core(conf: Config) extends Module {
   io.imem.addr := fetch.io.imem.addr
 
   fetch.io.br_taken := execute.io.data.br_taken
-  val inst = Wire(UInt(conf.xlen.W))
-  inst := Mux(flush, Instructions.NOP, io.imem.rdata)
+  val inst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
 
   val fe_pc = RegEnable(fetch.io.pc, !stall)
   val fe_inst = RegEnable(inst, Instructions.NOP, !stall)

@@ -62,17 +62,8 @@ class Execute(xlen: Int, rlen: Int) extends Module {
   io.data.alu_out := alu.io.out
   alu.io.op := io.ctrl.alu_op
 
-  alu.io.a := 0.U
-  switch (io.ctrl.a_sel) {
-    is (ASel.pc)  { alu.io.a := io.data.pc }
-    is (ASel.rs1) { alu.io.a := io.rf.rs1r }
-  }
-
-  alu.io.b := 0.U
-  switch (io.ctrl.b_sel) {
-    is (BSel.imm) { alu.io.b := io.data.imm }
-    is (BSel.rs2) { alu.io.b := io.rf.rs2r }
-  }
+  alu.io.a := Mux(io.ctrl.a_sel === ASel.rs1, io.rf.rs1r, io.data.pc)
+  alu.io.b := Mux(io.ctrl.b_sel === BSel.rs2, io.rf.rs2r, io.data.imm)
 
   val daddr = alu.io.out & ~("b11".U(xlen.W))
   val woffset = (alu.io.out(1) << 4.U) | (alu.io.out(0) << 3.U)
