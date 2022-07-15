@@ -20,7 +20,6 @@ class ExecuteDataIO(xlen: Int, rlen: Int) extends Bundle {
   val rd = Output(UInt(rlen.W))
   val imm = Output(UInt(xlen.W))
   val alu_out = Output(UInt(xlen.W))
-  val alu_sum = Output(UInt(xlen.W))
   val br_taken = Output(Bool())
 }
 
@@ -61,7 +60,6 @@ class Execute(xlen: Int, rlen: Int) extends Module {
 
   val alu = Module(new Alu(xlen))
   io.data.alu_out := alu.io.out
-  io.data.alu_sum := alu.io.sum
   alu.io.op := io.ctrl.alu_op
 
   alu.io.a := 0.U
@@ -76,8 +74,8 @@ class Execute(xlen: Int, rlen: Int) extends Module {
     is (BSel.rs2) { alu.io.b := io.rf.rs2r }
   }
 
-  val daddr = alu.io.sum & ~("b11".U(xlen.W))
-  val woffset = (alu.io.sum(1) << 4.U) | (alu.io.sum(0) << 3.U)
+  val daddr = alu.io.out & ~("b11".U(xlen.W))
+  val woffset = (alu.io.out(1) << 4.U) | (alu.io.out(0) << 3.U)
 
   val dmem_rd_req = io.ctrl.ld_type =/= LdType.none
   val dmem_wr_req = io.ctrl.st_type =/= StType.none
@@ -89,8 +87,8 @@ class Execute(xlen: Int, rlen: Int) extends Module {
 
   io.dmem.be := "b1111".U
   switch (io.ctrl.st_type) {
-    is (StType.sh) { io.dmem.be := "b11".U << alu.io.sum(1, 0) }
-    is (StType.sb) { io.dmem.be := "b1".U << alu.io.sum(1, 0) }
+    is (StType.sh) { io.dmem.be := "b11".U << alu.io.out(1, 0) }
+    is (StType.sb) { io.dmem.be := "b1".U << alu.io.out(1, 0) }
   }
 
   val br = Module(new Branch(xlen))

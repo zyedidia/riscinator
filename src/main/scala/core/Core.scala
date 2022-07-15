@@ -46,6 +46,7 @@ class Core(conf: Config) extends Module {
 
   val control = Module(new Control())
 
+  val started = RegNext(reset.asBool)
   val stall = Wire(Bool())
   val flush = Wire(Bool())
 
@@ -55,21 +56,18 @@ class Core(conf: Config) extends Module {
 
   stall := (prev_imem_rd_req && !io.imem.rvalid) ||
            (prev_dmem_rd_req && !io.dmem.rvalid) ||
-           (prev_dmem_wr_req && !io.dmem.gnt)
+           (prev_dmem_wr_req && !io.dmem.gnt) ||
+           started
 
   io.imem.req := fetch.io.imem.req
   io.imem.addr := fetch.io.imem.addr
 
   fetch.io.br_taken := execute.io.data.br_taken
   val inst = Wire(UInt(conf.xlen.W))
-  val started = RegNext(reset.asBool)
-  inst := Mux(started || flush, Instructions.NOP, io.imem.rdata)
+  inst := Mux(flush, Instructions.NOP, io.imem.rdata)
 
   val fe_pc = RegEnable(fetch.io.pc, !stall)
-  val fe_inst = RegInit(Instructions.NOP)
-  when (!stall) {
-    fe_inst := inst
-  }
+  val fe_inst = RegEnable(inst, Instructions.NOP, !stall)
 
   control.io.inst := fe_inst
   execute.io.data.inst := fe_inst
@@ -113,7 +111,7 @@ class Core(conf: Config) extends Module {
   rf.io.wdata := writeback.io.rf.wdata
 
   fetch.io.ctrl.pc_sel := control.io.pc_sel
-  fetch.io.alu_sum := execute.io.data.alu_sum
+  fetch.io.alu_out := execute.io.data.alu_out
   fetch.io.ctrl.stall := stall
 
   // if an instruction tries to read from an rs1/rs2 while the previous
@@ -127,5 +125,5 @@ class Core(conf: Config) extends Module {
     execute.io.rf.rs2r := ew_alu_out
   }
 
-  flush := control.io.inst_kill || execute.io.data.br_taken
+  flush := control.io.inst_kill || execute.io.data.br_taken || started
 }

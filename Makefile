@@ -7,14 +7,19 @@ TEST=$(shell find ./src/test/scala -name "*.scala")
 
 build: generated/$(TOP).v
 
+firtool: generated/$(TOP).mfc.v
+
 check:
 	$(SBT) compile
 
 generated:
 	mkdir -p generated
 
-generated/$(TOP).v: $(SRC) generated
+generated/$(TOP).v generated/$(TOP).fir: $(SRC) generated
 	$(SBT) run $(MEM)
+
+generated/$(TOP).mfc.v: generated/$(TOP).fir
+	firtool -o $@ $< --disable-annotation-unknown --annotation-file=generated/$(TOP).anno.json --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 
 test:
 	$(MAKE) -C tests
