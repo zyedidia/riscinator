@@ -63,11 +63,11 @@ class Core(conf: Config) extends Module {
   fetch.io.br_taken := execute.io.data.br_taken
   val inst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
 
-  val pc_e = RegEnable(fetch.io.pc, !stall)
-  val inst_e = RegEnable(inst, !stall)
+  val fe_pc = RegEnable(fetch.io.pc, !stall)
+  val fe_inst = RegEnable(inst, !stall)
 
-  control.io.inst := inst_e
-  execute.io.data.inst := inst_e
+  control.io.inst := fe_inst
+  execute.io.data.inst := fe_inst
   execute.io.ctrl.imm_sel := control.io.imm_sel
   execute.io.ctrl.ld_type := control.io.ld_type
   execute.io.ctrl.st_type := control.io.st_type
@@ -76,7 +76,7 @@ class Core(conf: Config) extends Module {
   execute.io.ctrl.b_sel := control.io.b_sel
   execute.io.ctrl.br_type := control.io.br_type
 
-  execute.io.data.pc := pc_e
+  execute.io.data.pc := fe_pc
 
   rf.io.raddr1 := execute.io.rf.rs1
   rf.io.raddr2 := execute.io.rf.rs2
@@ -85,23 +85,23 @@ class Core(conf: Config) extends Module {
 
   io.dmem <> execute.io.dmem
 
-  val wb_sel_w = RegEnable(control.io.wb_sel, !stall)
-  val wb_en_w = RegEnable(control.io.wb_en, !stall)
-  val ld_type_w = RegEnable(control.io.ld_type, !stall)
+  val ew_wb_sel = RegEnable(control.io.wb_sel, !stall)
+  val ew_wb_en = RegEnable(control.io.wb_en, !stall)
+  val ew_ld_type = RegEnable(control.io.ld_type, !stall)
 
-  val rd_w = RegEnable(execute.io.data.rd, !stall)
-  val ld_w = io.dmem.rdata
-  val pc_w = RegEnable(pc_e, !stall)
-  val alu_out_w = RegEnable(execute.io.data.alu_out, !stall)
+  val ew_rd = RegEnable(execute.io.data.rd, !stall)
+  val ew_ld = io.dmem.rdata
+  val ew_pc = RegEnable(fe_pc, !stall)
+  val ew_alu_out = RegEnable(execute.io.data.alu_out, !stall)
 
-  writeback.io.ctrl.wb_sel := wb_sel_w
-  writeback.io.ctrl.wb_en := wb_en_w
-  writeback.io.ctrl.ld_type := ld_type_w
+  writeback.io.ctrl.wb_sel := ew_wb_sel
+  writeback.io.ctrl.wb_en := ew_wb_en
+  writeback.io.ctrl.ld_type := ew_ld_type
 
-  writeback.io.data.ld := ld_w
-  writeback.io.data.pc := pc_w
-  writeback.io.data.alu_out := alu_out_w
-  writeback.io.data.rd := rd_w
+  writeback.io.data.ld := ew_ld
+  writeback.io.data.pc := ew_pc
+  writeback.io.data.alu_out := ew_alu_out
+  writeback.io.data.rd := ew_rd
 
   rf.io.wen := writeback.io.rf.wen
   rf.io.waddr := writeback.io.rf.waddr
@@ -113,19 +113,14 @@ class Core(conf: Config) extends Module {
 
   // if an instruction tries to read from an rs1/rs2 while the previous
   // instruction is still writing it back, forward it from the ALU
-  val rs1hzd = wb_en_w && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === rd_w
-  when (wb_sel_w === WbSel.alu && rs1hzd) {
-    execute.io.rf.rs1r := alu_out_w
+  val rs1hzd = ew_wb_en && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === ew_rd
+  when (ew_wb_sel === WbSel.alu && rs1hzd) {
+    execute.io.rf.rs1r := ew_alu_out
   }
-  val rs2hzd = wb_en_w && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === rd_w
-  when (wb_sel_w === WbSel.alu && rs2hzd) {
-    execute.io.rf.rs2r := alu_out_w
+  val rs2hzd = ew_wb_en && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === ew_rd
+  when (ew_wb_sel === WbSel.alu && rs2hzd) {
+    execute.io.rf.rs2r := ew_alu_out
   }
 
   flush := control.io.inst_kill || execute.io.data.br_taken
-
-  // when (control.io.ld_type =/= LdType.none && (execute.io.data.rd === execute.io.rf.rs1 || execute.io.data.rd === execute.io.rf.rs2)) {
-  //   flush := true.B
-  //   stall := true.B
-  // }
 }

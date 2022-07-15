@@ -1,6 +1,6 @@
 TOP=Soc
 SBT=sbt --client
-MEM=mem/riscvtest.hex
+MEM=tests/riscvtest.hex
 
 SRC=$(shell find ./src/main/scala -name "*.scala")
 TEST=$(shell find ./src/test/scala -name "*.scala")
