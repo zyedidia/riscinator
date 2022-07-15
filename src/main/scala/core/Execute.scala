@@ -10,6 +10,7 @@ class ExecuteCtrlIO extends Bundle {
   val alu_op = Input(AluOp())
   val a_sel = Input(ASel())
   val b_sel = Input(BSel())
+  val br_type = Input(BrType())
 }
 
 class ExecuteDataIO(xlen: Int, rlen: Int) extends Bundle {
@@ -19,6 +20,7 @@ class ExecuteDataIO(xlen: Int, rlen: Int) extends Bundle {
   val rd = Output(UInt(rlen.W))
   val imm = Output(UInt(xlen.W))
   val alu_out = Output(UInt(xlen.W))
+  val br_taken = Output(Bool())
 }
 
 class ExecuteRfIO(xlen: Int, rlen: Int) extends Bundle {
@@ -88,4 +90,10 @@ class Execute(xlen: Int, rlen: Int) extends Module {
     is (StType.sh) { io.dmem.be := "b11".U << alu.io.out(1, 0) }
     is (StType.sb) { io.dmem.be := "b1".U << alu.io.out(1, 0) }
   }
+
+  val br = Module(new Branch(xlen))
+  br.io.rs1 := io.rf.rs1r
+  br.io.rs2 := io.rf.rs2r
+  br.io.br_type := io.ctrl.br_type
+  io.data.br_taken := br.io.taken
 }

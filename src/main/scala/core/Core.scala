@@ -48,7 +48,6 @@ class Core(conf: Config) extends Module {
 
   val stall = Wire(Bool())
   val flush = Wire(Bool())
-  flush := false.B
 
   val prev_imem_rd_req = RegNext(io.imem.req)
   val prev_dmem_rd_req = RegNext(io.dmem.req && !io.dmem.we)
@@ -61,19 +60,23 @@ class Core(conf: Config) extends Module {
   io.imem.req := fetch.io.imem.req
   io.imem.addr := fetch.io.imem.addr
 
-  val pc_f = RegEnable(fetch.io.pc, !stall)
-  val inst_f = RegEnable(io.imem.rdata, !stall)
+  fetch.io.br_taken := execute.io.data.br_taken
+  val inst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
 
-  control.io.inst := inst_f
-  execute.io.data.inst := inst_f
+  val pc_e = RegEnable(fetch.io.pc, !stall)
+  val inst_e = RegEnable(inst, !stall)
+
+  control.io.inst := inst_e
+  execute.io.data.inst := inst_e
   execute.io.ctrl.imm_sel := control.io.imm_sel
   execute.io.ctrl.ld_type := control.io.ld_type
   execute.io.ctrl.st_type := control.io.st_type
   execute.io.ctrl.alu_op := control.io.alu_op
   execute.io.ctrl.a_sel := control.io.a_sel
   execute.io.ctrl.b_sel := control.io.b_sel
+  execute.io.ctrl.br_type := control.io.br_type
 
-  execute.io.data.pc := pc_f
+  execute.io.data.pc := pc_e
 
   rf.io.raddr1 := execute.io.rf.rs1
   rf.io.raddr2 := execute.io.rf.rs2
@@ -88,7 +91,7 @@ class Core(conf: Config) extends Module {
 
   val rd_w = RegEnable(execute.io.data.rd, !stall)
   val ld_w = io.dmem.rdata
-  val pc_w = RegEnable(pc_f, !stall)
+  val pc_w = RegEnable(pc_e, !stall)
   val alu_out_w = RegEnable(execute.io.data.alu_out, !stall)
 
   writeback.io.ctrl.wb_sel := wb_sel_w
@@ -110,12 +113,19 @@ class Core(conf: Config) extends Module {
 
   // if an instruction tries to read from an rs1/rs2 while the previous
   // instruction is still writing it back, forward it from the ALU
-  val rs1hzd = control.io.wb_en && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === rd_w
-  when (control.io.wb_sel === WbSel.alu && rs1hzd) {
+  val rs1hzd = wb_en_w && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === rd_w
+  when (wb_sel_w === WbSel.alu && rs1hzd) {
     execute.io.rf.rs1r := alu_out_w
   }
-  val rs2hzd = control.io.wb_en && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === rd_w
-  when (control.io.wb_sel === WbSel.alu && rs2hzd) {
+  val rs2hzd = wb_en_w && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === rd_w
+  when (wb_sel_w === WbSel.alu && rs2hzd) {
     execute.io.rf.rs2r := alu_out_w
   }
+
+  flush := control.io.inst_kill || execute.io.data.br_taken
+
+  // when (control.io.ld_type =/= LdType.none && (execute.io.data.rd === execute.io.rf.rs1 || execute.io.data.rd === execute.io.rf.rs2)) {
+  //   flush := true.B
+  //   stall := true.B
+  // }
 }

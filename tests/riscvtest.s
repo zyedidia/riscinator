@@ -18,4 +18,4 @@ jal x3, end
 addi x2, x0, 1
 end: add x2, x2, x9
 sw x2, 0x20(x3)
-done: j done
+done: beq x2, x2, done
