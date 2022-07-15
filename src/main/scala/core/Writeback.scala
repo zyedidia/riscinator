@@ -31,7 +31,7 @@ class WritebackIO(xlen: Int, rlen: Int) extends Bundle {
 class Writeback(xlen: Int, rlen: Int) extends Module {
   val io = IO(new WritebackIO(xlen, rlen))
 
-  val ldoff = (io.data.alu_out(1) << 4.U).asUInt | (io.data.alu_out(0) << 3.U).asUInt
+  val ldoff = (io.data.alu_out(1) << 4.U) | (io.data.alu_out(0) << 3.U)
   val ldshift = io.data.ld >> ldoff
   val ld = Wire(SInt(xlen.W))
 

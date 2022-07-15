@@ -61,10 +61,15 @@ class Core(conf: Config) extends Module {
   io.imem.addr := fetch.io.imem.addr
 
   fetch.io.br_taken := execute.io.data.br_taken
-  val inst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
+  val inst = Wire(UInt(conf.xlen.W))
+  val started = RegNext(reset.asBool)
+  inst := Mux(started || flush, Instructions.NOP, io.imem.rdata)
 
   val fe_pc = RegEnable(fetch.io.pc, !stall)
-  val fe_inst = RegEnable(inst, !stall)
+  val fe_inst = RegInit(Instructions.NOP)
+  when (!stall) {
+    fe_inst := inst
+  }
 
   control.io.inst := fe_inst
   execute.io.data.inst := fe_inst
@@ -108,7 +113,7 @@ class Core(conf: Config) extends Module {
   rf.io.wdata := writeback.io.rf.wdata
 
   fetch.io.ctrl.pc_sel := control.io.pc_sel
-  fetch.io.alu_out := execute.io.data.alu_out
+  fetch.io.alu_sum := execute.io.data.alu_sum
   fetch.io.ctrl.stall := stall
 
   // if an instruction tries to read from an rs1/rs2 while the previous
