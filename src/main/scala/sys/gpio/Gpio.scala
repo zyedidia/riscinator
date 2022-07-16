@@ -1,9 +1,9 @@
-package rvcpu.sys.gpio
+package rtor.sys.gpio
 
 import chisel3._
 import chisel3.util._
 
-import rvcpu.bus._
+import rtor.bus._
 
 object RegMap {
   val inVal = 0x0

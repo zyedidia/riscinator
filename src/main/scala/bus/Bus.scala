@@ -1,4 +1,4 @@
-package rvcpu.bus
+package rtor.bus
 
 import chisel3._
 import chisel3.util._

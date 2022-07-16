@@ -1,4 +1,4 @@
-package rvcpu.sys.ram
+package rtor.sys.ram
 
 import chisel3._
 import chisel3.util._
@@ -6,7 +6,7 @@ import chisel3.util.experimental.loadMemoryFromFileInline
 import chisel3.experimental.{annotate, ChiselAnnotation}
 import firrtl.annotations.MemorySynthInit
 
-import rvcpu.bus._
+import rtor.bus._
 
 class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
   val io = IO(new Bundle{

@@ -7,7 +7,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class SocTest extends AnyFlatSpec with ChiselScalatestTester {
   "riscvtest" should "pass" in {
-    test(new rvcpu.Soc("./tests/riscvtest.mem")).runPeekPoke(new PeekPokeTester(_) {
+    test(new rtor.Soc("./tests/riscvtest.mem")).runPeekPoke(new PeekPokeTester(_) {
       for (i <- 1 to 1000) {
         step(1)
       }
@@ -30,7 +30,7 @@ class SocTest extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   "itype" should "pass" in {
-    test(new rvcpu.Soc("./tests/itype.mem")).runPeekPoke(new PeekPokeTester(_) {
+    test(new rtor.Soc("./tests/itype.mem")).runPeekPoke(new PeekPokeTester(_) {
       for (i <- 1 to 1000) {
         step(1)
       }
@@ -58,7 +58,7 @@ class SocTest extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   "jmps" should "pass" in {
-    test(new rvcpu.Soc("./tests/jmps.mem")).runPeekPoke(new PeekPokeTester(_) {
+    test(new rtor.Soc("./tests/jmps.mem")).runPeekPoke(new PeekPokeTester(_) {
       for (i <- 1 to 1000) {
         step(1)
       }
@@ -98,7 +98,7 @@ class SocTest extends AnyFlatSpec with ChiselScalatestTester {
 class SocSim extends AnyFlatSpec with ChiselScalatestTester {
   "Soc" should "simulate" in {
     test(
-      new rvcpu.Soc("./tests/riscvtest.mem")
+      new rtor.Soc("./tests/riscvtest.mem")
     ).withAnnotations(Seq(
       treadle.WriteVcdAnnotation,
       treadle.MemoryToVCD("all")

@@ -6,20 +6,20 @@ LD = $(PREFIX)-ld
 OBJCOPY = $(PREFIX)-objcopy
 OBJDUMP = $(PREFIX)-objdump
 
-LIBRV_ROOT ?= $(shell git rev-parse --show-toplevel)/sw/librv
-INCLUDE = -I$(LIBRV_ROOT)
+LIBRTOR_ROOT ?= $(shell git rev-parse --show-toplevel)/sw/librtor
+INCLUDE = -I$(LIBRTOR_ROOT)
 ARCH = rv32i
 
 O ?= s
 
 CFLAGS = -O$(O) $(INCLUDE) -g -Wall -Wno-unused-function -nostdlib -nostartfiles -ffreestanding -march=$(ARCH) -mabi=ilp32 -std=gnu99 -mcmodel=medany
 ASFLAGS = -march=$(ARCH) -mabi=ilp32
-LDFLAGS = -T $(LIBRV_ROOT)/memmap.ld -melf32lriscv
+LDFLAGS = -T $(LIBRTOR_ROOT)/memmap.ld -melf32lriscv
 LIBGCC = $(shell $(CC) $(CFLAGS) --print-file-name=libgcc.a)
 LDLIBS = $(LIBGCC)
 
-LIBCSRC = $(wildcard $(LIBRV_ROOT)/*.c) $(wildcard $(LIBRV_ROOT)/libc/*.c)
-LIBSSRC = $(wildcard $(LIBRV_ROOT)/*.s)
+LIBCSRC = $(wildcard $(LIBRTOR_ROOT)/*.c) $(wildcard $(LIBRTOR_ROOT)/libc/*.c)
+LIBSSRC = $(wildcard $(LIBRTOR_ROOT)/*.s)
 LIBOBJ = $(LIBCSRC:.c=.o) $(LIBSSRC:.s=.o)
 
 SRC = $(wildcard *.c)

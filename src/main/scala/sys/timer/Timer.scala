@@ -1,9 +1,9 @@
-package rvcpu.sys.timer
+package rtor.sys.timer
 
 import chisel3._
 import chisel3.util._
 
-import rvcpu.bus._
+import rtor.bus._
 
 object RegMap {
   val mtime_low = 0

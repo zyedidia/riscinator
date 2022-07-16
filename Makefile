@@ -35,6 +35,9 @@ sim:
 format:
 	$(SBT) scalafmtAll
 
+shutdown:
+	$(SBT) shutdown
+
 include tech/$(TECH)/rules.mk
 
 clean:

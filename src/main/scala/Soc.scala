@@ -1,13 +1,13 @@
-package rvcpu
+package rtor
 
 import chisel3._
 import chisel3.util._
 
-import rvcpu.core._
-import rvcpu.bus._
-import rvcpu.sys.ram._
-import rvcpu.sys.gpio._
-import rvcpu.sys.timer._
+import rtor.core._
+import rtor.bus._
+import rtor.sys.ram._
+import rtor.sys.gpio._
+import rtor.sys.timer._
 
 import scala.collection.mutable.ListBuffer
 
