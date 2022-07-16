@@ -35,10 +35,11 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
 
   val inVal = RegNext(io.gpi.asUInt, 0.U)
   val outVal = wReg(RegMap.outVal.U, nOut)
+  val addr = RegNext(io.bus.addr(offset, 0))
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
-  switch (io.bus.addr(offset, 0)) {
+  switch (addr) {
     is (RegMap.inVal.U) {
       io.bus.err := false.B
       io.bus.rdata := inVal
@@ -50,6 +51,5 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
   }
 
   io.gpo := outVal.asBools
-
   io.bus.rvalid := RegNext(io.bus.req)
 }

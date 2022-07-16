@@ -1,9 +1,10 @@
-TOP=Soc
-SBT=sbt --client
-MEM=tests/riscvtest.hex
+TOP = Soc
+SBT = sbt --client
+MEM = sw/blink/blink.mem
+TECH = orangecrab
 
-SRC=$(shell find ./src/main/scala -name "*.scala")
-TEST=$(shell find ./src/test/scala -name "*.scala")
+SRC = $(shell find ./src/main/scala -name "*.scala")
+TEST = $(shell find ./src/test/scala -name "*.scala")
 
 build: generated/$(TOP).v
 
@@ -15,7 +16,7 @@ check:
 generated:
 	mkdir -p generated
 
-generated/$(TOP).v generated/$(TOP).fir: $(SRC) generated
+generated/$(TOP).v generated/$(TOP).fir: $(SRC) generated $(MEM)
 	$(SBT) run $(MEM)
 
 generated/$(TOP).mfc.v: generated/$(TOP).fir
@@ -28,7 +29,10 @@ test:
 format:
 	$(SBT) scalafmtAll
 
+include tech/$(TECH)/rules.mk
+
 clean:
 	rm -rf generated
+	$(BOARDCLEAN)
 
 .PHONY: build check test clean

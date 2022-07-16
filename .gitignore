@@ -4,6 +4,16 @@ project/target
 test_run_dir
 .bsp
 *.hex
+*.asc
+*.bin
+*.mem
+*.json
+*.o
+*.vcd
+*_out.config
+*.bit
+*.dfu
+*.list
 
 # Scala IDEs
 .project

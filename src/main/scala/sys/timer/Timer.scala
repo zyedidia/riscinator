@@ -22,10 +22,11 @@ class Timer(offset: Int, addrw: Int, dataw: Int) extends Module {
 
   val cyc_timer = RegInit(0.U(32.W))
   cyc_timer := cyc_timer + 1.U
+  val addr = RegNext(io.bus.addr(offset, 0))
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
-  switch (io.bus.addr(offset, 0)) {
+  switch (addr) {
     is (RegMap.cycle_timer.U) {
       io.bus.err := false.B
       io.bus.rdata := cyc_timer

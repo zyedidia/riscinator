@@ -19,7 +19,7 @@ case class Device(base: Int, size: Int, busIO: (Int, Int) => RwIO) {
 
 object Mmio {
   val RamBase = 0x100000
-  val RamSize = 4 * 1024
+  val RamSize = 16 * 1024
   val TimerBase = 0x10000
   val TimerSize = 1024
   val GpioBase = 0x20000
