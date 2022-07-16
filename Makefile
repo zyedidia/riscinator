@@ -2,13 +2,12 @@ TOP = Soc
 SBT = sbt --client
 MEM = sw/blink/blink.mem
 TECH = orangecrab
+FIRTOOL = 0
 
 SRC = $(shell find ./src/main/scala -name "*.scala")
 TEST = $(shell find ./src/test/scala -name "*.scala")
 
 build: generated/$(TOP).v
-
-firtool: generated/$(TOP).mfc.v
 
 check:
 	$(SBT) compile
@@ -16,11 +15,14 @@ check:
 generated:
 	mkdir -p generated
 
-generated/$(TOP).v generated/$(TOP).fir: $(SRC) generated $(MEM)
+ifeq ($(FIRTOOL),0)
+generated/$(TOP).v: $(SRC) generated $(MEM)
 	$(SBT) run $(MEM)
-
-generated/$(TOP).mfc.v: generated/$(TOP).fir
-	firtool -o $@ $< --disable-annotation-unknown --annotation-file=generated/$(TOP).anno.json --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables --imconstprop --imdeadcodeelim --inline --dedup --preserve-values=none
+else
+generated/$(TOP).v: $(SRC) generated $(MEM)
+	$(SBT) run $(MEM)
+	firtool -o $@ generated/$(TOP).fir --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables --imconstprop --imdeadcodeelim --inline --dedup --preserve-values=none
+endif
 
 test:
 	$(MAKE) -C tests
