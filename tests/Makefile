@@ -1,12 +1,12 @@
 SRCS=$(wildcard *.s)
-PROGS=$(SRCS:.s=.hex)
+PROGS=$(SRCS:.s=.mem)
 
 all: $(PROGS)
 
-%.hex: %.s
-	rvasm -base 0 $< > $@
+%.mem: %.s
+	rvasm -base 1048576 $< > $@
 
 clean:
-	rm -f *.hex
+	rm -f *.mem
 
 .PHONY: all clean

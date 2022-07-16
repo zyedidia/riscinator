@@ -26,7 +26,11 @@ endif
 
 test:
 	$(MAKE) -C tests
-	$(SBT) "Test / test"
+	$(SBT) "testOnly *SocTest"
+
+sim:
+	$(MAKE) -C tests
+	$(SBT) "testOnly *SocSim"
 
 format:
 	$(SBT) scalafmtAll
