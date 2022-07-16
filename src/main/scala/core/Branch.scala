@@ -18,7 +18,6 @@ class Branch(xlen: Int) extends Module {
   val ltu = io.rs1 < io.rs2
 
   io.taken := false.B
-
   switch (io.br_type) {
     is (BrType.eq)  { io.taken := eq   }
     is (BrType.ne)  { io.taken := !eq  }

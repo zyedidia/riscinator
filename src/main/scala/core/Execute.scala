@@ -48,7 +48,7 @@ class Execute(xlen: Int, rlen: Int) extends Module {
   io.data.imm := sint.asUInt
 
   val inst = io.data.inst
-  sint := 0.S
+  sint := DontCare
   switch (io.ctrl.imm_sel) {
     is (ImmSel.i) { sint := inst(31, 20).asSInt }
     is (ImmSel.s) { sint := Cat(inst(31, 25), inst(11, 7)).asSInt }

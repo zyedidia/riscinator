@@ -45,7 +45,7 @@ class Writeback(xlen: Int, rlen: Int) extends Module {
 
   io.rf.wen := io.ctrl.wb_en
   io.rf.waddr := io.data.rd
-  io.rf.wdata := 0.U
+  io.rf.wdata := DontCare
   switch (io.ctrl.wb_sel) {
     is (WbSel.alu) { io.rf.wdata := io.data.alu_out }
     is (WbSel.mem) { io.rf.wdata := ld.asUInt }

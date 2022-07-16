@@ -14,6 +14,7 @@ test_run_dir
 *.bit
 *.dfu
 *.list
+*.elf
 
 # Scala IDEs
 .project
