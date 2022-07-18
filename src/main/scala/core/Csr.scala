@@ -11,18 +11,18 @@ object Priv extends ChiselEnum {
 
 object Csr {
   // user-level
-  val cycle = 0xC00.U(12.W)
-  val time = 0xC01.U(12.W)
-  val instret = 0xC02.U(12.W)
-  val cycleh = 0xC80.U(12.W)
-  val timeh = 0xC81.U(12.W)
-  val instreth = 0xC82.U(12.W)
+  val cycle = 0xc00.U(12.W)
+  val time = 0xc01.U(12.W)
+  val instret = 0xc02.U(12.W)
+  val cycleh = 0xc80.U(12.W)
+  val timeh = 0xc81.U(12.W)
+  val instreth = 0xc82.U(12.W)
 
   // machine information registers
-  val mvendorid = 0xF11.U(12.W)
-  val marchid = 0xF12.U(12.W)
-  val mimpid = 0xF13.U(12.W)
-  val mhartid = 0xF14.U(12.W)
+  val mvendorid = 0xf11.U(12.W)
+  val marchid = 0xf12.U(12.W)
+  val mimpid = 0xf13.U(12.W)
+  val mhartid = 0xf14.U(12.W)
 
   // machine trap setup
   val mstatus = 0x300.U(12.W)
@@ -108,12 +108,10 @@ class Csr(xlen: Int) extends Module {
     Csr.cycleh -> cycleh,
     Csr.timeh -> timeh,
     Csr.instreth -> instreth,
-
     Csr.mvendorid -> 0.U(xlen.W),
     Csr.marchid -> 0.U(xlen.W),
     Csr.mimpid -> 0.U(xlen.W),
     Csr.mhartid -> 0.U(xlen.W),
-
     Csr.mstatus -> 0.U(xlen.W),
     Csr.misa -> 0.U(xlen.W),
     Csr.medeleg -> 0.U(xlen.W),
@@ -121,7 +119,6 @@ class Csr(xlen: Int) extends Module {
     Csr.mie -> 0.U(xlen.W),
     Csr.mtvec -> 0.U(xlen.W),
     Csr.mcounteren -> 0.U(xlen.W),
-
     Csr.mscratch -> mscratch,
     Csr.mepc -> 0.U(xlen.W),
     Csr.mcause -> 0.U(xlen.W),
