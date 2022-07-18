@@ -31,3 +31,5 @@ test_run_dir
 *.swp
 
 .DS_Store
+
+conf.mk

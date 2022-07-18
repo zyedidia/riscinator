@@ -16,7 +16,7 @@ class FifoIO[T <: Data](t: T) extends Bundle {
 
 class Fifo[T <: Data](t: T, addrw: Int) extends Module {
   class FifoRegFile[T <: Data](t: T, addrw: Int) extends Module {
-    val io = IO(new Bundle{
+    val io = IO(new Bundle {
       val wen = Input(Bool())
       val waddr = Input(UInt(addrw.W))
       val raddr = Input(UInt(addrw.W))
@@ -26,13 +26,13 @@ class Fifo[T <: Data](t: T, addrw: Int) extends Module {
 
     val regs = Mem(pow(2, addrw).toInt, t)
     io.rdata := regs(io.raddr)
-    when (io.wen) {
+    when(io.wen) {
       regs(io.waddr) := io.wdata
     }
   }
 
   class FifoCtrl(addrw: Int) extends Module {
-    val io = IO(new Bundle{
+    val io = IO(new Bundle {
       val rd = Input(Bool())
       val wr = Input(Bool())
       val empty = Output(Bool())
@@ -46,26 +46,26 @@ class Fifo[T <: Data](t: T, addrw: Int) extends Module {
     val full = RegInit(false.B)
     val empty = RegInit(true.B)
 
-    switch (io.wr ## io.rd) {
-      is ("b01".U) {
-        when (!empty) {
-          when (r_ptr + 1.U === w_ptr) {
+    switch(io.wr ## io.rd) {
+      is("b01".U) {
+        when(!empty) {
+          when(r_ptr + 1.U === w_ptr) {
             empty := true.B
           }
           r_ptr := r_ptr + 1.U
           full := false.B
         }
       }
-      is ("b10".U) {
-        when (!full) {
-          when (w_ptr === r_ptr) {
+      is("b10".U) {
+        when(!full) {
+          when(w_ptr === r_ptr) {
             full := true.B
           }
           w_ptr := w_ptr + 1.U
           empty := false.B
         }
       }
-      is ("b11".U) {
+      is("b11".U) {
         w_ptr := w_ptr + 1.U
         r_ptr := r_ptr + 1.U
       }

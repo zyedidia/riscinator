@@ -55,21 +55,24 @@ class Core(conf: Config) extends Module {
   val prev_dmem_wr_req = RegNext(io.dmem.req && io.dmem.we)
 
   stall := (prev_imem_rd_req && !io.imem.rvalid) ||
-           (prev_dmem_rd_req && !io.dmem.rvalid) ||
-           (prev_dmem_wr_req && !io.dmem.gnt) ||
-           started
+    (prev_dmem_rd_req && !io.dmem.rvalid) ||
+    (prev_dmem_wr_req && !io.dmem.gnt) ||
+    started
 
   io.imem.req := fetch.io.imem.req
   io.imem.addr := fetch.io.imem.addr
 
   fetch.io.br_taken := execute.io.data.br_taken
-  val inst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
+  val finst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
 
-  val fe_pc = RegEnable(fetch.io.pc, !stall)
-  val fe_inst = RegEnable(inst, Instructions.NOP, !stall)
+  val fe = new {
+    val pc = RegEnable(fetch.io.pc, !stall)
+    val inst = RegEnable(finst, Instructions.NOP, !stall)
+  }
 
-  control.io.inst := fe_inst
-  execute.io.data.inst := fe_inst
+  control.io.inst := fe.inst
+  execute.io.data.inst := fe.inst
+
   execute.io.ctrl.imm_sel := control.io.imm_sel
   execute.io.ctrl.ld_type := control.io.ld_type
   execute.io.ctrl.st_type := control.io.st_type
@@ -78,7 +81,7 @@ class Core(conf: Config) extends Module {
   execute.io.ctrl.b_sel := control.io.b_sel
   execute.io.ctrl.br_type := control.io.br_type
 
-  execute.io.data.pc := fe_pc
+  execute.io.data.pc := fe.pc
 
   rf.io.raddr1 := execute.io.rf.rs1
   rf.io.raddr2 := execute.io.rf.rs2
@@ -87,23 +90,25 @@ class Core(conf: Config) extends Module {
 
   io.dmem <> execute.io.dmem
 
-  val ew_wb_sel = RegEnable(control.io.wb_sel, !stall)
-  val ew_wb_en = RegEnable(control.io.wb_en, !stall)
-  val ew_ld_type = RegEnable(control.io.ld_type, !stall)
+  val ew = new {
+    val wb_sel = RegEnable(control.io.wb_sel, !stall)
+    val wb_en = RegEnable(control.io.wb_en, !stall)
+    val ld_type = RegEnable(control.io.ld_type, !stall)
 
-  val ew_rd = RegEnable(execute.io.data.rd, !stall)
-  val ew_ld = io.dmem.rdata
-  val ew_pc = RegEnable(fe_pc, !stall)
-  val ew_alu_out = RegEnable(execute.io.data.alu_out, !stall)
+    val rd = RegEnable(execute.io.data.rd, !stall)
+    val ld = io.dmem.rdata
+    val pc = RegEnable(fe.pc, !stall)
+    val alu_out = RegEnable(execute.io.data.alu_out, !stall)
+  }
 
-  writeback.io.ctrl.wb_sel := ew_wb_sel
-  writeback.io.ctrl.wb_en := ew_wb_en
-  writeback.io.ctrl.ld_type := ew_ld_type
+  writeback.io.ctrl.wb_sel := ew.wb_sel
+  writeback.io.ctrl.wb_en := ew.wb_en
+  writeback.io.ctrl.ld_type := ew.ld_type
 
-  writeback.io.data.ld := ew_ld
-  writeback.io.data.pc := ew_pc
-  writeback.io.data.alu_out := ew_alu_out
-  writeback.io.data.rd := ew_rd
+  writeback.io.data.ld := ew.ld
+  writeback.io.data.pc := ew.pc
+  writeback.io.data.alu_out := ew.alu_out
+  writeback.io.data.rd := ew.rd
 
   rf.io.wen := writeback.io.rf.wen
   rf.io.waddr := writeback.io.rf.waddr
@@ -113,16 +118,18 @@ class Core(conf: Config) extends Module {
   fetch.io.alu_out := execute.io.data.alu_out
   fetch.io.ctrl.stall := stall
 
-  // if an instruction tries to read from an rs1/rs2 while the previous
-  // instruction is still writing it back, forward it from the ALU
-  val rs1hzd = ew_wb_en && execute.io.rf.rs1 =/= 0.U && execute.io.rf.rs1 === ew_rd
-  when (ew_wb_sel === WbSel.alu && rs1hzd) {
-    execute.io.rf.rs1r := ew_alu_out
-  }
-  val rs2hzd = ew_wb_en && execute.io.rf.rs2 =/= 0.U && execute.io.rf.rs2 === ew_rd
-  when (ew_wb_sel === WbSel.alu && rs2hzd) {
-    execute.io.rf.rs2r := ew_alu_out
-  }
+  def regeq(r1: UInt, r2: UInt) = r1 =/= 0.U && r1 === r2
 
+  def fwd[T <: Data](cond: Bool, to: T, from: T) =
+    when(cond) {
+      to := from
+    }
+
+  // if an instruction tries to read from an rs1/rs2 while the previous
+  // instruction is still writing it back from the ALU, forward it from the ALU
+  fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs1, ew.rd), execute.io.rf.rs1r, ew.alu_out)
+  fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs2, ew.rd), execute.io.rf.rs2r, ew.alu_out)
+
+  // flush the pipeline for slow instructions (loads) and when branches are taken
   flush := control.io.inst_kill || execute.io.data.br_taken || started
 }

@@ -29,7 +29,7 @@ object Mmio {
 class Soc(memFile: String) extends Module {
   val xlen = 32
 
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val gpi = Vec(1, Input(Bool()))
     val gpo = Vec(7, Output(Bool()))
   })
@@ -37,23 +37,35 @@ class Soc(memFile: String) extends Module {
   val boot = Mmio.RamBase.U(xlen.W)
   val core = Module(new Core(Config(xlen, boot)))
 
-  val ram = Module(new Ram(log2Ceil(Mmio.RamBase)-1, Mmio.RamSize / 4, xlen, xlen, memFile))
-  val timer = Module(new Timer(log2Ceil(Mmio.TimerBase)-1, xlen, xlen))
-  val gpio = Module(new Gpio(log2Ceil(Mmio.GpioBase)-1, 1, 7, xlen, xlen))
+  val ram = Module(new Ram(log2Ceil(Mmio.RamBase) - 1, Mmio.RamSize / 4, xlen, xlen, memFile))
+  val timer = Module(new Timer(log2Ceil(Mmio.TimerBase) - 1, xlen, xlen))
+  val gpio = Module(new Gpio(log2Ceil(Mmio.GpioBase) - 1, 1, 7, xlen, xlen))
 
   val devices = List(
-    Device(Mmio.RamBase, Mmio.RamSize, () => {
-      core.io.imem <> ram.io.imem
-      ram.io.dmem
-    }),
-    Device(Mmio.TimerBase, Mmio.TimerSize, () => {
-      timer.io.bus
-    }),
-    Device(Mmio.GpioBase, Mmio.GpioSize, () => {
-      gpio.io.gpo <> io.gpo
-      gpio.io.gpi <> io.gpi
-      gpio.io.bus
-    })
+    Device(
+      Mmio.RamBase,
+      Mmio.RamSize,
+      () => {
+        core.io.imem <> ram.io.imem
+        ram.io.dmem
+      }
+    ),
+    Device(
+      Mmio.TimerBase,
+      Mmio.TimerSize,
+      () => {
+        timer.io.bus
+      }
+    ),
+    Device(
+      Mmio.GpioBase,
+      Mmio.GpioSize,
+      () => {
+        gpio.io.gpo <> io.gpo
+        gpio.io.gpi <> io.gpi
+        gpio.io.bus
+      }
+    )
   )
 
   var devs = new ListBuffer[BaseMask]()

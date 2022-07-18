@@ -14,7 +14,7 @@ object RegMap {
 }
 
 class Timer(offset: Int, addrw: Int, dataw: Int) extends Module {
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val bus = Flipped(new RwIO(addrw, dataw))
 
     val intr = Output(Bool())
@@ -26,8 +26,8 @@ class Timer(offset: Int, addrw: Int, dataw: Int) extends Module {
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
-  switch (addr) {
-    is (RegMap.cycle_timer.U) {
+  switch(addr) {
+    is(RegMap.cycle_timer.U) {
       io.bus.err := false.B
       io.bus.rdata := cyc_timer
     }

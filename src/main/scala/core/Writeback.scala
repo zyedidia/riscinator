@@ -36,19 +36,19 @@ class Writeback(xlen: Int, rlen: Int) extends Module {
   val ld = Wire(SInt(xlen.W))
 
   ld := io.data.ld.zext
-  switch (io.ctrl.ld_type) {
-    is (LdType.lh)  { ld := ldshift(15, 0).asSInt }
-    is (LdType.lb)  { ld := ldshift(7, 0).asSInt }
-    is (LdType.lhu) { ld := ldshift(15, 0).zext }
-    is (LdType.lbu) { ld := ldshift(7, 0).zext }
+  switch(io.ctrl.ld_type) {
+    is(LdType.lh)  { ld := ldshift(15, 0).asSInt }
+    is(LdType.lb)  { ld := ldshift(7, 0).asSInt }
+    is(LdType.lhu) { ld := ldshift(15, 0).zext }
+    is(LdType.lbu) { ld := ldshift(7, 0).zext }
   }
 
   io.rf.wen := io.ctrl.wb_en
   io.rf.waddr := io.data.rd
   io.rf.wdata := DontCare
-  switch (io.ctrl.wb_sel) {
-    is (WbSel.alu) { io.rf.wdata := io.data.alu_out }
-    is (WbSel.mem) { io.rf.wdata := ld.asUInt }
-    is (WbSel.pc4) { io.rf.wdata := io.data.pc + 4.U }
+  switch(io.ctrl.wb_sel) {
+    is(WbSel.alu) { io.rf.wdata := io.data.alu_out }
+    is(WbSel.mem) { io.rf.wdata := ld.asUInt }
+    is(WbSel.pc4) { io.rf.wdata := io.data.pc + 4.U }
   }
 }

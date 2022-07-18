@@ -49,13 +49,13 @@ class Execute(xlen: Int, rlen: Int) extends Module {
 
   val inst = io.data.inst
   sint := DontCare
-  switch (io.ctrl.imm_sel) {
-    is (ImmSel.i) { sint := inst(31, 20).asSInt }
-    is (ImmSel.s) { sint := Cat(inst(31, 25), inst(11, 7)).asSInt }
-    is (ImmSel.b) { sint := Cat(inst(31), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W)).asSInt }
-    is (ImmSel.u) { sint := Cat(inst(31, 12), 0.U(12.W)).asSInt }
-    is (ImmSel.j) { sint := Cat(inst(31), inst(19, 12), inst(20), inst(30, 25), inst(24, 21), 0.U(1.W)).asSInt }
-    is (ImmSel.z) { sint := inst(19, 15).zext }
+  switch(io.ctrl.imm_sel) {
+    is(ImmSel.i) { sint := inst(31, 20).asSInt }
+    is(ImmSel.s) { sint := Cat(inst(31, 25), inst(11, 7)).asSInt }
+    is(ImmSel.b) { sint := Cat(inst(31), inst(7), inst(30, 25), inst(11, 8), 0.U(1.W)).asSInt }
+    is(ImmSel.u) { sint := Cat(inst(31, 12), 0.U(12.W)).asSInt }
+    is(ImmSel.j) { sint := Cat(inst(31), inst(19, 12), inst(20), inst(30, 25), inst(24, 21), 0.U(1.W)).asSInt }
+    is(ImmSel.z) { sint := inst(19, 15).zext }
   }
 
   val alu = Module(new Alu(xlen))
@@ -77,9 +77,9 @@ class Execute(xlen: Int, rlen: Int) extends Module {
   io.dmem.wdata := io.rf.rs2r << woffset
 
   io.dmem.be := "b1111".U
-  switch (io.ctrl.st_type) {
-    is (StType.sh) { io.dmem.be := "b11".U << alu.io.out(1, 0) }
-    is (StType.sb) { io.dmem.be := "b1".U << alu.io.out(1, 0) }
+  switch(io.ctrl.st_type) {
+    is(StType.sh) { io.dmem.be := "b11".U << alu.io.out(1, 0) }
+    is(StType.sb) { io.dmem.be := "b1".U << alu.io.out(1, 0) }
   }
 
   val br = Module(new Branch(xlen))

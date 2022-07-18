@@ -9,7 +9,7 @@ import firrtl.annotations.MemorySynthInit
 import rtor.bus._
 
 class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val imem = Flipped(new RoIO(addrw, dataw))
     val dmem = Flipped(new RwIO(addrw, dataw))
   })
@@ -35,21 +35,21 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
   val drvalid = RegNext(io.dmem.req)
   io.dmem.rvalid := drvalid
 
-  val iaddr = io.imem.addr(offset-1, log2Ceil(dataw / 8))
-  val daddr = io.dmem.addr(offset-1, log2Ceil(dataw / 8))
+  val iaddr = io.imem.addr(offset - 1, log2Ceil(dataw / 8))
+  val daddr = io.dmem.addr(offset - 1, log2Ceil(dataw / 8))
   io.imem.rdata := mem.read(iaddr, io.imem.req)
   io.dmem.rdata := mem.read(daddr, io.dmem.req)
 
   val write = (0 until (dataw / 8)).foldLeft(0.U(dataw.W)) { (write, i) =>
     write |
-    (Mux(
-      io.dmem.req && io.dmem.be(i),
-      io.dmem.wdata,
-      mem(daddr)
-    )(8 * (i + 1) - 1, 8 * i) << (8 * i).U).asUInt
+      (Mux(
+        io.dmem.req && io.dmem.be(i),
+        io.dmem.wdata,
+        mem(daddr)
+      )(8 * (i + 1) - 1, 8 * i) << (8 * i).U).asUInt
   }
 
-  when (io.dmem.req && io.dmem.we) {
+  when(io.dmem.req && io.dmem.we) {
     mem.write(daddr, write)
   }
 }

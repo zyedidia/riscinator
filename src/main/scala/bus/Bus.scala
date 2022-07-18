@@ -35,11 +35,11 @@ class SimpleBus(
   nHost: Int,
   addrw: Int,
   dataw: Int,
-  devs: List[BaseMask]
-) extends Module {
+  devs:  List[BaseMask])
+    extends Module {
   val nDev = devs.length
 
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val host = Vec(nHost, Flipped(new RwIO(addrw, dataw)))
     val dev = Vec(nDev, new RwIO(addrw, dataw))
   })
@@ -52,7 +52,7 @@ class SimpleBus(
   // Host select
   hostSelReq := 0.U
   for (host <- (0 until nHost).reverse) {
-    when (io.host(host).req) {
+    when(io.host(host).req) {
       hostSelReq := host.U
     }
   }
@@ -62,7 +62,7 @@ class SimpleBus(
   // Device select
   devSelReq := 0.U
   for (dev <- 0 until nDev) {
-    when ((io.host(hostSelReq).addr & ~devs(dev).mask) === devs(dev).base) {
+    when((io.host(hostSelReq).addr & ~devs(dev).mask) === devs(dev).base) {
       devSelReq := dev.U
     }
   }
@@ -72,13 +72,13 @@ class SimpleBus(
   val devSelResp = RegNext(devSelReq, 0.U)
 
   for (dev <- 0 until nDev) {
-    when (dev.U === devSelReq) {
+    when(dev.U === devSelReq) {
       io.dev(dev).req := io.host(hostSelReq).req
       io.dev(dev).we := io.host(hostSelReq).we
       io.dev(dev).addr := io.host(hostSelReq).addr
       io.dev(dev).wdata := io.host(hostSelReq).wdata
       io.dev(dev).be := io.host(hostSelReq).be
-    } .otherwise {
+    }.otherwise {
       io.dev(dev).req := false.B
       io.dev(dev).we := false.B
       io.dev(dev).addr := 0.U
@@ -89,11 +89,11 @@ class SimpleBus(
 
   for (host <- 0 until nHost) {
     io.host(host).gnt := false.B
-    when (host.U === hostSelResp) {
+    when(host.U === hostSelResp) {
       io.host(host).rvalid := io.dev(devSelResp).rvalid
       io.host(host).err := io.dev(devSelResp).err
       io.host(host).rdata := io.dev(devSelResp).rdata
-    } .otherwise {
+    }.otherwise {
       io.host(host).rvalid := false.B
       io.host(host).err := false.B
       io.host(host).rdata := 0.U

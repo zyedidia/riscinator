@@ -29,11 +29,11 @@ class Fetch(xlen: Int, bootAddr: UInt) extends Module {
   pc := next
   io.pc := pc
 
-  when (io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
+  when(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
     next := pc
-  } .elsewhen (io.ctrl.pc_sel === PcSel.alu || io.br_taken) {
+  }.elsewhen(io.ctrl.pc_sel === PcSel.alu || io.br_taken) {
     next := io.alu_out & ~(1.U(xlen.W))
-  } .otherwise {
+  }.otherwise {
     next := pc + 4.U
   }
 

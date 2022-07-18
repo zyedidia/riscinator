@@ -99,10 +99,12 @@ class SocSim extends AnyFlatSpec with ChiselScalatestTester {
   "Soc" should "simulate" in {
     test(
       new rtor.Soc("./tests/riscvtest.mem")
-    ).withAnnotations(Seq(
-      treadle.WriteVcdAnnotation,
-      treadle.MemoryToVCD("all")
-    )) { dut =>
+    ).withAnnotations(
+      Seq(
+        treadle.WriteVcdAnnotation,
+        treadle.MemoryToVCD("all")
+      )
+    ) { dut =>
       for (i <- 1 to 5) {
         dut.io.gpi(0).poke(i % 2 == 0)
         for (j <- 1 to 1000) {
@@ -112,4 +114,3 @@ class SocSim extends AnyFlatSpec with ChiselScalatestTester {
     }
   }
 }
-

@@ -11,7 +11,7 @@ object RegMap {
 }
 
 class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Module {
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val bus = Flipped(new RwIO(addrw, dataw))
 
     val gpi = Vec(nIn, Input(Bool()))
@@ -26,7 +26,7 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
     val reg = RegInit(0.U(width.W))
     val rwe = we && (io.bus.addr(offset, 0) === addr)
 
-    when (rwe) {
+    when(rwe) {
       reg := io.bus.wdata
     }
 
@@ -39,12 +39,12 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
 
   io.bus.err := true.B
   io.bus.rdata := 0.U
-  switch (addr) {
-    is (RegMap.inVal.U) {
+  switch(addr) {
+    is(RegMap.inVal.U) {
       io.bus.err := false.B
       io.bus.rdata := inVal
     }
-    is (RegMap.outVal.U) {
+    is(RegMap.outVal.U) {
       io.bus.err := false.B
       io.bus.rdata := outVal
     }
