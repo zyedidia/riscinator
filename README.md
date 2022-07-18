@@ -26,11 +26,8 @@ The makefile has the following targets:
 * `make prog`: send the bitstream to the FPGA.
 * `make test`: run the test suite.
 
-Some of these targets require you to install the tools in `tools/`:
-
-* `bin2hex`: converts binary files to Verilog hex memory files.
-
-The targets in `sw` also require you to have a RISC-V GNU toolchain installed.
+The tests and example programs require you to have a RISC-V GNU toolchain
+installed.
 
 You can also use the MLIR-based FIRRTL compiler `firtool` from the
 [CIRCT](https://github.com/llvm/circt) project by setting `FIRTOOL=1` in the

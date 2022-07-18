@@ -28,7 +28,7 @@ OBJ = $(SRC:.c=.o)
 all: $(PROG).hex $(PROG).mem
 
 $(PROG).mem: $(PROG).bin
-	bin2hex $< > $(PROG).mem
+	hexdump -e '1/4 "%08x\n"' $< > $(PROG).mem
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
