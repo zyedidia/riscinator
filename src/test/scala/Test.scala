@@ -98,7 +98,7 @@ class SocTest extends AnyFlatSpec with ChiselScalatestTester {
 class SocSim extends AnyFlatSpec with ChiselScalatestTester {
   "Soc" should "simulate" in {
     test(
-      new rtor.Soc("./tests/riscvtest.mem")
+      new rtor.Soc("./tests/csr.mem")
     ).withAnnotations(
       Seq(
         treadle.WriteVcdAnnotation,

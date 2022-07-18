@@ -19,6 +19,7 @@ class ExecuteDataIO(xlen: Int, rlen: Int) extends Bundle {
 
   val rd = Output(UInt(rlen.W))
   val imm = Output(UInt(xlen.W))
+  val csr = Output(UInt(12.W))
   val alu_out = Output(UInt(xlen.W))
   val br_taken = Output(Bool())
 }
@@ -43,6 +44,7 @@ class Execute(xlen: Int, rlen: Int) extends Module {
   io.rf.rs1 := io.data.inst(19, 15)
   io.rf.rs2 := io.data.inst(24, 20)
   io.data.rd := io.data.inst(11, 7)
+  io.data.csr := io.data.inst(31, 20)
 
   val sint = Wire(SInt(xlen.W))
   io.data.imm := sint.asUInt

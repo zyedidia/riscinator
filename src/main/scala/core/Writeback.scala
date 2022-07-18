@@ -13,6 +13,7 @@ class WritebackDataIO(xlen: Int) extends Bundle {
   val ld = Input(UInt(xlen.W))
   val pc = Input(UInt(xlen.W))
   val alu_out = Input(UInt(xlen.W))
+  val csr_rdata = Input(UInt(xlen.W))
   val rd = Input(UInt(xlen.W))
 }
 
@@ -50,5 +51,6 @@ class Writeback(xlen: Int, rlen: Int) extends Module {
     is(WbSel.alu) { io.rf.wdata := io.data.alu_out }
     is(WbSel.mem) { io.rf.wdata := ld.asUInt }
     is(WbSel.pc4) { io.rf.wdata := io.data.pc + 4.U }
+    is(WbSel.csr) { io.rf.wdata := io.data.csr_rdata }
   }
 }

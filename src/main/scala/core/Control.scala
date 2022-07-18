@@ -117,6 +117,7 @@ class ControlIO extends Bundle {
   val wb_sel = Output(WbSel())
   val wb_en = Output(Bool())
   val illegal = Output(Bool())
+  val csr_type = Output(CsrType())
 }
 
 class Control extends Module {
@@ -136,4 +137,5 @@ class Control extends Module {
   io.wb_sel := signals(9)
   io.wb_en := signals(10)
   io.illegal := signals(11)
+  io.csr_type := signals(12)
 }

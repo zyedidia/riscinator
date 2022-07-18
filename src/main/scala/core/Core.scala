@@ -43,6 +43,7 @@ class Core(conf: Config) extends Module {
   val fetch = Module(new Fetch(conf.xlen, conf.bootAddr))
   val execute = Module(new Execute(conf.xlen, rlen))
   val writeback = Module(new Writeback(conf.xlen, rlen))
+  val csr = Module(new Csr(conf.xlen))
 
   val control = Module(new Control())
 
@@ -94,12 +95,27 @@ class Core(conf: Config) extends Module {
     val wb_sel = RegEnable(control.io.wb_sel, !stall)
     val wb_en = RegEnable(control.io.wb_en, !stall)
     val ld_type = RegEnable(control.io.ld_type, !stall)
+    val csr_type = RegEnable(control.io.csr_type, !stall)
+    val st_type = RegEnable(control.io.st_type, !stall)
+    val pc_sel = RegEnable(control.io.pc_sel, !stall)
 
     val rd = RegEnable(execute.io.data.rd, !stall)
     val ld = io.dmem.rdata
     val pc = RegEnable(fe.pc, !stall)
     val alu_out = RegEnable(execute.io.data.alu_out, !stall)
+    val csr = RegEnable(execute.io.data.csr, !stall)
+    val rs1 = RegEnable(execute.io.rf.rs1, !stall)
+    val rs1r = RegEnable(execute.io.rf.rs1r, !stall)
   }
+
+  csr.io.ctrl.csr_type := ew.csr_type
+  csr.io.ctrl.st_type := ew.st_type
+  csr.io.ctrl.ld_type := ew.ld_type
+  csr.io.ctrl.pc_sel := ew.pc_sel
+  csr.io.pc := ew.pc
+  csr.io.csr := ew.csr
+  csr.io.rs1 := ew.rs1
+  csr.io.wdata := ew.rs1r
 
   writeback.io.ctrl.wb_sel := ew.wb_sel
   writeback.io.ctrl.wb_en := ew.wb_en
@@ -108,6 +124,7 @@ class Core(conf: Config) extends Module {
   writeback.io.data.ld := ew.ld
   writeback.io.data.pc := ew.pc
   writeback.io.data.alu_out := ew.alu_out
+  writeback.io.data.csr_rdata := csr.io.rdata
   writeback.io.data.rd := ew.rd
 
   rf.io.wen := writeback.io.rf.wen

@@ -9,7 +9,7 @@ object Priv extends ChiselEnum {
   val m = 3.U(2.W)
 }
 
-object CsrRegs {
+object Csr {
   // user-level
   val cycle = 0xC00.U(12.W)
   val time = 0xC01.U(12.W)
@@ -65,9 +65,10 @@ class CsrIO(xlen: Int) extends Bundle {
   val pc = Input(UInt(xlen.W))
   val csr = Input(UInt(12.W))
   val rs1 = Input(UInt(5.W))
+  val wdata = Input(UInt(xlen.W))
 
-  val exception = Output(Bool())
-  val epc = Output(UInt(xlen.W))
+  // val exception = Output(Bool())
+  // val epc = Output(UInt(xlen.W))
   val rdata = Output(UInt(xlen.W))
 }
 
@@ -94,40 +95,48 @@ class Csr(xlen: Int) extends Module {
   val mtvec = 0.U(xlen.W)
   val mcounteren = 0.U(xlen.W)
 
-  val mscratch = 0.U(xlen.W)
+  val mscratch = RegInit(0.U(xlen.W))
   val mepc = 0.U(xlen.W)
   val mcause = 0.U(xlen.W)
   val mtval = 0.U(xlen.W)
   val mip = 0.U(xlen.W)
 
   val regs = Array(
-    CsrRegs.cycle -> cycle,
-    CsrRegs.time -> time,
-    CsrRegs.instret -> instret,
-    CsrRegs.cycleh -> cycleh,
-    CsrRegs.timeh -> timeh,
-    CsrRegs.instreth -> instreth,
+    Csr.cycle -> cycle,
+    Csr.time -> time,
+    Csr.instret -> instret,
+    Csr.cycleh -> cycleh,
+    Csr.timeh -> timeh,
+    Csr.instreth -> instreth,
 
-    CsrRegs.mvendorid -> 0.U(xlen.W),
-    CsrRegs.marchid -> 0.U(xlen.W),
-    CsrRegs.mimpid -> 0.U(xlen.W),
-    CsrRegs.mhartid -> 0.U(xlen.W),
+    Csr.mvendorid -> 0.U(xlen.W),
+    Csr.marchid -> 0.U(xlen.W),
+    Csr.mimpid -> 0.U(xlen.W),
+    Csr.mhartid -> 0.U(xlen.W),
 
-    CsrRegs.mstatus -> 0.U(xlen.W),
-    CsrRegs.misa -> 0.U(xlen.W),
-    CsrRegs.medeleg -> 0.U(xlen.W),
-    CsrRegs.mideleg -> 0.U(xlen.W),
-    CsrRegs.mie -> 0.U(xlen.W),
-    CsrRegs.mtvec -> 0.U(xlen.W),
-    CsrRegs.mcounteren -> 0.U(xlen.W),
+    Csr.mstatus -> 0.U(xlen.W),
+    Csr.misa -> 0.U(xlen.W),
+    Csr.medeleg -> 0.U(xlen.W),
+    Csr.mideleg -> 0.U(xlen.W),
+    Csr.mie -> 0.U(xlen.W),
+    Csr.mtvec -> 0.U(xlen.W),
+    Csr.mcounteren -> 0.U(xlen.W),
 
-    CsrRegs.mscratch -> 0.U(xlen.W),
-    CsrRegs.mepc -> 0.U(xlen.W),
-    CsrRegs.mcause -> 0.U(xlen.W),
-    CsrRegs.mtval -> 0.U(xlen.W),
-    CsrRegs.mip -> 0.U(xlen.W)
+    Csr.mscratch -> mscratch,
+    Csr.mepc -> 0.U(xlen.W),
+    Csr.mcause -> 0.U(xlen.W),
+    Csr.mtval -> 0.U(xlen.W),
+    Csr.mip -> 0.U(xlen.W)
   )
 
   io.rdata := MuxLookup(io.csr, 0.U, regs)
   val valid = regs.map(_._1 === io.csr).reduce(_ || _)
+  val wen = io.ctrl.csr_type === CsrType.w
+  val wdata = MuxCase(0.U, Array((io.ctrl.csr_type === CsrType.w) -> io.wdata))
+
+  when(wen) {
+    switch(io.csr) {
+      is(Csr.mscratch) { mscratch := wdata }
+    }
+  }
 }
