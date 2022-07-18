@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.experimental.ChiselEnum
 
 object CsrType extends ChiselEnum {
-  val n, w, s, c, p = Value
+  val n, w, s, c, e = Value
 }
 
 object PcSel extends ChiselEnum {
@@ -88,17 +88,17 @@ object Control {
     OR    -> List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.or,    BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n),
     AND   -> List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.and,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n),
     FENCE -> List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n),
-    FENCEI-> List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)
-    // CSRRW -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w),
-    // CSRRS -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s),
-    // CSRRC -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c),
-    // CSRRWI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w),
-    // CSRRSI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s),
-    // CSRRCI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c),
-    // ECALL -> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.p),
-    // EBREAK-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.p),
-    // ERET  -> List(PcSel.epc,   ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.p),
-    // WFI   -> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)
+    FENCEI-> List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n),
+    CSRRW -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w),
+    CSRRS -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s),
+    CSRRC -> List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c),
+    CSRRWI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w),
+    CSRRSI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s),
+    CSRRCI-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c),
+    ECALL -> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.e),
+    EBREAK-> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.e),
+    ERET  -> List(PcSel.epc,   ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.e),
+    WFI   -> List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)
   )
   // format: on
 }
