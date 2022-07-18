@@ -29,7 +29,6 @@ The makefile has the following targets:
 Some of these targets require you to install the tools in `tools/`:
 
 * `bin2hex`: converts binary files to Verilog hex memory files.
-* `rvasm`: simple RISC-V assembler.
 
 The targets in `sw` also require you to have a RISC-V GNU toolchain installed.
 

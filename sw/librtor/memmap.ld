@@ -5,7 +5,7 @@ ENTRY(_start)
 SECTIONS
 {
     . = ALIGN(4);
-    .text 0x100000 : {
+    .text 0x100000 : AT(0x0) {
         __code_start__ = .;
         KEEP(*(.text.boot))
         *(.text*)

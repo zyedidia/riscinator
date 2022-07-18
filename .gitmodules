@@ -1,3 +1,0 @@
-[submodule "tools/rvasm"]
-	path = tools/rvasm
-	url = https://github.com/zyedidia/rvasm

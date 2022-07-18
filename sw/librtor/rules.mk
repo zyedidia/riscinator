@@ -6,7 +6,7 @@ LD = $(PREFIX)-ld
 OBJCOPY = $(PREFIX)-objcopy
 OBJDUMP = $(PREFIX)-objdump
 
-LIBRTOR_ROOT ?= $(shell git rev-parse --show-toplevel)/sw/librtor
+LIBRTOR_ROOT = $(shell git rev-parse --show-toplevel)/sw/librtor
 INCLUDE = -I$(LIBRTOR_ROOT)
 ARCH = rv32i
 

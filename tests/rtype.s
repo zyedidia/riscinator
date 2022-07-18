@@ -1,3 +1,7 @@
+.section ".text.boot"
+
+.globl _start
+_start:
 not x1, x0
 not x2, x0
 not x3, x0
