@@ -43,7 +43,7 @@ class Core(conf: Config) extends Module {
   val fetch = Module(new Fetch(conf.xlen, conf.bootAddr))
   val execute = Module(new Execute(conf.xlen, rlen))
   val writeback = Module(new Writeback(conf.xlen, rlen))
-  val csr = Module(new Csr(conf.xlen))
+  val csr = Module(new Csr(conf.xlen, conf.bootAddr))
 
   val control = Module(new Control())
 

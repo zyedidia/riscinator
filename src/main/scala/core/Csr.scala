@@ -72,68 +72,76 @@ class CsrIO(xlen: Int) extends Bundle {
   val rdata = Output(UInt(xlen.W))
 }
 
-class Csr(xlen: Int) extends Module {
+class Csr(xlen: Int, bootAddr: UInt) extends Module {
   val io = IO(new CsrIO(xlen))
 
-  val cycle = RegInit(0.U(xlen.W))
-  val time = RegInit(0.U(xlen.W))
-  val instret = RegInit(0.U(xlen.W))
-  val cycleh = RegInit(0.U(xlen.W))
-  val timeh = RegInit(0.U(xlen.W))
-  val instreth = RegInit(0.U(xlen.W))
+  def mtreg() = new {
+    val p = RegInit(false.B)
+    val e = RegInit(false.B)
+  }
+  // bits for mip and mie
+  val mei = mtreg()
+  val mti = mtreg()
+  val msi = mtreg()
 
-  val mvendorid = 0.U(xlen.W)
-  val marchid = 0.U(xlen.W)
-  val mimpid = 0.U(xlen.W)
-  val mhartid = 0.U(xlen.W)
+  // bits for mstatus
+  val mpp = RegInit(Priv.m)
+  val mpie = RegInit(false.B)
+  val mie = RegInit(false.B)
 
-  val mstatus = 0.U(xlen.W)
-  val misa = 0.U(xlen.W)
-  val medeleg = 0.U(xlen.W)
-  val mideleg = 0.U(xlen.W)
-  val mie = 0.U(xlen.W)
-  val mtvec = 0.U(xlen.W)
-  val mcounteren = 0.U(xlen.W)
+  val priv = RegInit(Priv.m)
 
-  val mscratch = RegInit(0.U(xlen.W))
-  val mepc = 0.U(xlen.W)
-  val mcause = 0.U(xlen.W)
-  val mtval = 0.U(xlen.W)
-  val mip = 0.U(xlen.W)
-
-  val regs = Array(
-    Csr.cycle -> cycle,
-    Csr.time -> time,
-    Csr.instret -> instret,
-    Csr.cycleh -> cycleh,
-    Csr.timeh -> timeh,
-    Csr.instreth -> instreth,
+  val regs = Map(
+    Csr.cycle -> RegInit(0.U(xlen.W)),
+    Csr.time -> RegInit(0.U(xlen.W)),
+    Csr.instret -> RegInit(0.U(xlen.W)),
+    Csr.cycleh -> RegInit(0.U(xlen.W)),
+    Csr.timeh -> RegInit(0.U(xlen.W)),
+    Csr.instreth -> RegInit(0.U(xlen.W)),
     Csr.mvendorid -> 0.U(xlen.W),
     Csr.marchid -> 0.U(xlen.W),
-    Csr.mimpid -> 0.U(xlen.W),
+    Csr.mimpid -> 5000.U(xlen.W),
     Csr.mhartid -> 0.U(xlen.W),
-    Csr.mstatus -> 0.U(xlen.W),
-    Csr.misa -> 0.U(xlen.W),
-    Csr.medeleg -> 0.U(xlen.W),
-    Csr.mideleg -> 0.U(xlen.W),
-    Csr.mie -> 0.U(xlen.W),
-    Csr.mtvec -> 0.U(xlen.W),
+    Csr.mstatus -> Cat(0.U(19.W), mpp, 0.U(3.W) mpie, 0.U(3.W), mie, 0.U(3.W)),
+    Csr.misa -> Cat(1.U(2.W), 0.U((xlen - 28).W), ((1 << 'I' - 'A') | (1 << 'U' - 'A')).U(26.W)),
+    // medeleg and mideleg don't exist because we don't have user mode traps
+    Csr.mip -> Cat(0.U((xlen - 12).W), mei.p, 0.U(3.W), mti.p, 0.U(3.W), msi.p, 0.U(3.W)),
+    Csr.mie -> Cat(0.U((xlen - 12).W), mei.e, 0.U(3.W), mti.e, 0.U(3.W), msi.e, 0.U(3.W)),
+    Csr.mtvec -> RegInit(bootAddr),
     Csr.mcounteren -> 0.U(xlen.W),
-    Csr.mscratch -> mscratch,
-    Csr.mepc -> 0.U(xlen.W),
-    Csr.mcause -> 0.U(xlen.W),
-    Csr.mtval -> 0.U(xlen.W),
-    Csr.mip -> 0.U(xlen.W)
+    Csr.mscratch -> RegInit(0.U(xlen.W)),
+    Csr.mepc -> Reg(xlen.W),
+    Csr.mcause -> Reg(xlen.W),
+    Csr.mtval -> Reg(xlen.W),
   )
 
-  io.rdata := MuxLookup(io.csr, 0.U, regs)
+  io.rdata := MuxLookup(io.csr, 0.U, regs.toSeq)
   val valid = regs.map(_._1 === io.csr).reduce(_ || _)
   val wen = io.ctrl.csr_type === CsrType.w
   val wdata = MuxCase(0.U, Array((io.ctrl.csr_type === CsrType.w) -> io.wdata))
 
   when(wen) {
     switch(io.csr) {
-      is(Csr.mscratch) { mscratch := wdata }
+      is(Csr.mstatus) {
+        mpp := wdata(12, 11)
+        mpie := wdata(7)
+        mie := wdata(3)
+      }
+      is(Csr.mip) {
+        mei.p := wdata(11)
+        mti.p := wdata(7)
+        msi.p := wdata(3)
+      }
+      is(Csr.mie) {
+        mei.e := wdata(11)
+        mti.e := wdata(7)
+        msi.e := wdata(3)
+      }
+      is(Csr.mscratch) { regs(Csr.mscratch) := wdata }
+      is(Csr.mtvec) { regs(Csr.mtvec) := wdata }
+      is(Csr.mepc) { regs(Csr.mepc) := wdata >> 2.U << 2.U }
+      // XXX: can anything be written to mcause?
+      is(Csr.mcause) { regs(Csr.mcause) := wdata }
     }
   }
 }
