@@ -16,6 +16,7 @@ class FetchMemIO(addrw: Int) extends Bundle {
 class FetchIO(xlen: Int) extends Bundle {
   val imem = new FetchMemIO(xlen)
   val ctrl = new FetchCtrlIO()
+  val epc = Input(Valid(UInt(xlen.W)))
   val br_taken = Input(Bool())
   val alu_out = Input(UInt(xlen.W))
   val pc = Output(UInt(xlen.W))
@@ -29,7 +30,9 @@ class Fetch(xlen: Int, bootAddr: UInt) extends Module {
   pc := next
   io.pc := pc
 
-  when(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
+  when(io.epc.valid) {
+    next := io.epc.bits
+  } .elsewhen(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
     next := pc
   }.elsewhen(io.ctrl.pc_sel === PcSel.alu || io.br_taken) {
     next := io.alu_out & ~(1.U(xlen.W))

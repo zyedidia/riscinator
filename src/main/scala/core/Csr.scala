@@ -2,7 +2,7 @@ package rtor.core
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.ChiselEnum
+import chisel3.experimental.{ChiselEnum, EnumType}
 
 object Priv extends ChiselEnum {
   val u = 0.U(2.W)
@@ -44,7 +44,7 @@ object Csr {
 object Cause {
   val instAddrMisaligned = 0.U
   val instAccessFault = 1.U
-  val illegalInsn = 2.U
+  val illegalInst = 2.U
   val breakpoint = 3.U
   val loadAddrMisaligned = 4.U
   val loadAccessFault = 5.U
@@ -57,6 +57,7 @@ class CsrCtrlIO extends Bundle {
   val st_type = Input(StType())
   val ld_type = Input(LdType())
   val pc_sel = Input(PcSel())
+  val illegal = Input(Bool())
 }
 
 class CsrIO(xlen: Int) extends Bundle {
@@ -67,8 +68,7 @@ class CsrIO(xlen: Int) extends Bundle {
   val rs1 = Input(UInt(5.W))
   val wdata = Input(UInt(xlen.W))
 
-  // val exception = Output(Bool())
-  // val epc = Output(UInt(xlen.W))
+  val epc = Output(Valid(UInt(xlen.W)))
   val rdata = Output(UInt(xlen.W))
 }
 
@@ -102,7 +102,7 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     Csr.marchid -> 0.U(xlen.W),
     Csr.mimpid -> 5000.U(xlen.W),
     Csr.mhartid -> 0.U(xlen.W),
-    Csr.mstatus -> Cat(0.U(19.W), mpp, 0.U(3.W) mpie, 0.U(3.W), mie, 0.U(3.W)),
+    Csr.mstatus -> Cat(0.U(19.W), mpp, 0.U(3.W), mpie, 0.U(3.W), mie, 0.U(3.W)),
     Csr.misa -> Cat(1.U(2.W), 0.U((xlen - 28).W), ((1 << 'I' - 'A') | (1 << 'U' - 'A')).U(26.W)),
     // medeleg and mideleg don't exist because we don't have user mode traps
     Csr.mip -> Cat(0.U((xlen - 12).W), mei.p, 0.U(3.W), mti.p, 0.U(3.W), msi.p, 0.U(3.W)),
@@ -110,17 +110,51 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     Csr.mtvec -> RegInit(bootAddr),
     Csr.mcounteren -> 0.U(xlen.W),
     Csr.mscratch -> RegInit(0.U(xlen.W)),
-    Csr.mepc -> Reg(xlen.W),
-    Csr.mcause -> Reg(xlen.W),
-    Csr.mtval -> Reg(xlen.W),
+    Csr.mepc -> Reg(UInt(xlen.W)),
+    Csr.mcause -> Reg(UInt(xlen.W)),
+    Csr.mtval -> Reg(UInt(xlen.W)),
   )
+
+  // TODO: check privilege level
+
+  def isT(t: EnumType) = io.ctrl.csr_type === t
 
   io.rdata := MuxLookup(io.csr, 0.U, regs.toSeq)
   val valid = regs.map(_._1 === io.csr).reduce(_ || _)
-  val wen = io.ctrl.csr_type === CsrType.w
-  val wdata = MuxCase(0.U, Array((io.ctrl.csr_type === CsrType.w) -> io.wdata))
+  val wen = isT(CsrType.w) || isT(CsrType.s) || isT(CsrType.c) && io.rs1 =/= 0.U
+  val wdata = MuxCase(0.U, Array(
+    isT(CsrType.w) -> io.wdata,
+    isT(CsrType.s) -> (io.rdata | io.wdata),
+    isT(CsrType.c) -> (io.rdata & ~io.wdata),
+  ))
 
-  when(wen) {
+  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal
+
+  io.epc.bits := DontCare
+  io.epc.valid := false.B
+
+  when(exception) {
+    regs(Csr.mepc) := io.pc >> 2 << 2
+    regs(Csr.mcause) := MuxCase(DontCare, Array(
+      (isT(CsrType.ec) && priv === Priv.m) -> Cause.ecallM,
+      (isT(CsrType.ec) && priv === Priv.u) -> Cause.ecallU,
+      isT(CsrType.eb) -> Cause.breakpoint,
+      io.ctrl.illegal -> Cause.illegalInst
+    ))
+    priv := Priv.m
+    mie := false.B
+    mpie := mie
+    mpp := priv
+    io.epc.valid := true.B
+    io.epc.bits := regs(Csr.mtvec)
+  }.elsewhen(isT(CsrType.er)) {
+    priv := mpp
+    mie := mpie
+    mpp := Priv.u
+    mpie := true.B
+    io.epc.valid := true.B
+    io.epc.bits := regs(Csr.mepc)
+  }.elsewhen(wen) {
     switch(io.csr) {
       is(Csr.mstatus) {
         mpp := wdata(12, 11)

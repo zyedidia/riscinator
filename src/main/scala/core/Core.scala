@@ -98,6 +98,7 @@ class Core(conf: Config) extends Module {
     val csr_type = RegEnable(control.io.csr_type, !stall)
     val st_type = RegEnable(control.io.st_type, !stall)
     val pc_sel = RegEnable(control.io.pc_sel, !stall)
+    val illegal = RegEnable(control.io.illegal, !stall)
 
     val rd = RegEnable(execute.io.data.rd, !stall)
     val ld = io.dmem.rdata
@@ -112,6 +113,7 @@ class Core(conf: Config) extends Module {
   csr.io.ctrl.st_type := ew.st_type
   csr.io.ctrl.ld_type := ew.ld_type
   csr.io.ctrl.pc_sel := ew.pc_sel
+  csr.io.ctrl.illegal := ew.illegal
   csr.io.pc := ew.pc
   csr.io.csr := ew.csr
   csr.io.rs1 := ew.rs1
@@ -134,6 +136,7 @@ class Core(conf: Config) extends Module {
   fetch.io.ctrl.pc_sel := control.io.pc_sel
   fetch.io.alu_out := execute.io.data.alu_out
   fetch.io.ctrl.stall := stall
+  fetch.io.epc := csr.io.epc
 
   def regeq(r1: UInt, r2: UInt) = r1 =/= 0.U && r1 === r2
 
