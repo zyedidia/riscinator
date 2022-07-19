@@ -21,10 +21,10 @@ generated:
 	mkdir -p generated
 
 ifeq ($(FIRTOOL),0)
-generated/$(TOP).v: $(SRC) generated sw
+generated/$(TOP).v: $(SRC) generated
 	$(SBT) run $(MEM)
 else
-generated/$(TOP).v: $(SRC) generated sw
+generated/$(TOP).v: $(SRC) generated
 	$(SBT) run $(MEM)
 	firtool -o $@ generated/$(TOP).fir --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables --imconstprop --imdeadcodeelim --inline --dedup --preserve-values=none
 endif
