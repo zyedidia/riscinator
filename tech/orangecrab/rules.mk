@@ -23,6 +23,6 @@ $(TOP).bit: $(TOP)_out.config
 	ecppack --compress --freq 38.8 --input $< --bit $@
 
 report: $(REPORT)
-	nextime -util $(REPORT)
+	nextime -clk clk_sys -util $(REPORT)
 
 .PHONY: synth prog report
