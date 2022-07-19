@@ -22,15 +22,14 @@ generated:
 
 ifeq ($(FIRTOOL),0)
 generated/$(TOP).v: $(SRC) generated
+	$(MAKE) -C sw/$(SW)
 	$(SBT) run $(MEM)
 else
 generated/$(TOP).v: $(SRC) generated
-	$(SBT) run $(MEM)
-	firtool -o $@ generated/$(TOP).fir --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables --imconstprop --imdeadcodeelim --inline --dedup --preserve-values=none
-endif
-
-sw:
 	$(MAKE) -C sw/$(SW)
+	$(SBT) run $(MEM)
+	firtool -o $@ generated/$(TOP).fir --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
+endif
 
 test:
 	$(MAKE) -C tests
@@ -56,4 +55,4 @@ clean:
 	$(MAKE) -C sw/$(SW) clean
 	$(BOARDCLEAN)
 
-.PHONY: build check test clean sw
+.PHONY: build check test clean
