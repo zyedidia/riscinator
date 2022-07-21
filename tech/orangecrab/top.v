@@ -8,8 +8,8 @@ module top
         output wire rgb_led0_b,
         output wire gpio_0,
         output wire gpio_1,
-        output wire gpio_2,
-        output wire gpio_3
+        output wire gpio_5,
+        output wire gpio_9
     );
 
     logic locked;
@@ -50,7 +50,7 @@ module top
         .io_gpo_2 (led_b),
         .io_gpo_3 (gpio_0),
         .io_gpo_4 (gpio_1),
-        .io_gpo_5 (gpio_2),
-        .io_gpo_6 (gpio_3)
+        .io_gpo_5 (gpio_5),
+        .io_gpo_6 (gpio_9)
     );
 endmodule
