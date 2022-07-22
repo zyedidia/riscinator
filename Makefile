@@ -5,7 +5,7 @@ SW ?= dummy
 
 TOP = Soc
 SBT = sbt --client
-FIRTOOL = 0
+FIRTOOL ?= 0
 
 SRC = $(shell find ./src/main/scala -name "*.scala")
 TEST = $(shell find ./src/test/scala -name "*.scala")
