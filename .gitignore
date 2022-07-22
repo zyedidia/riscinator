@@ -33,3 +33,5 @@ test_run_dir
 .DS_Store
 
 conf.mk
+todo.txt
+notes.txt

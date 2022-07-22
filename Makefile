@@ -28,7 +28,7 @@ else
 generated/$(TOP).v: $(SRC) generated
 	$(MAKE) -C sw/$(SW)
 	$(SBT) run $(MEM)
-	firtool -o $@ generated/$(TOP).fir --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
+	firtool -o $@ generated/$(TOP).fir --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 endif
 
 test:
