@@ -42,10 +42,10 @@ class Soc(memFile: String) extends Module {
   val boot = Mmio.RamBase.U(xlen.W)
   val core = Module(new Core(Config(xlen, boot)))
 
-  val ram = Module(new Ram(log2Ceil(Mmio.RamBase) - 1, Mmio.RamSize / 4, xlen, xlen, memFile))
-  val timer = Module(new Timer(log2Ceil(Mmio.TimerBase) - 1, xlen, xlen))
-  val gpio = Module(new Gpio(log2Ceil(Mmio.GpioBase) - 1, 1, 7, xlen, xlen))
-  val uart = Module(new Uart(log2Ceil(Mmio.UartBase) - 1, 8, xlen, xlen))
+  val ram = Module(new Ram(log2Ceil(Mmio.RamSize) - 1, Mmio.RamSize / 4, xlen, xlen, memFile))
+  val timer = Module(new Timer(log2Ceil(Mmio.TimerSize) - 1, xlen, xlen))
+  val gpio = Module(new Gpio(log2Ceil(Mmio.GpioSize) - 1, 1, 7, xlen, xlen))
+  val uart = Module(new Uart(log2Ceil(Mmio.UartSize) - 1, 3, xlen, xlen))
 
   val devices = List(
     Device(

@@ -41,8 +41,8 @@ class Fifo[T <: Data](t: T, addrw: Int) extends Module {
       val raddr = Output(UInt(addrw.W))
     })
 
-    val w_ptr = RegInit(0.U)
-    val r_ptr = RegInit(0.U)
+    val w_ptr = RegInit(0.U(addrw.W))
+    val r_ptr = RegInit(0.U(addrw.W))
     val full = RegInit(false.B)
     val empty = RegInit(true.B)
 
@@ -58,7 +58,7 @@ class Fifo[T <: Data](t: T, addrw: Int) extends Module {
       }
       is("b10".U) {
         when(!full) {
-          when(w_ptr === r_ptr) {
+          when(w_ptr + 1.U === r_ptr) {
             full := true.B
           }
           w_ptr := w_ptr + 1.U
