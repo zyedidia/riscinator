@@ -38,18 +38,19 @@ class Gpio(offset: Int, nIn: Int, nOut: Int, addrw: Int, dataw: Int) extends Mod
   val addr = RegNext(io.bus.addr(offset, 0))
 
   io.bus.err := true.B
-  io.bus.rdata := 0.U
+  val rdata = WireDefault(0.U(dataw.W))
   switch(addr) {
     is(RegMap.inVal.U) {
       io.bus.err := false.B
-      io.bus.rdata := inVal
+      rdata := inVal
     }
     is(RegMap.outVal.U) {
       io.bus.err := false.B
-      io.bus.rdata := outVal
+      rdata := outVal
     }
   }
 
   io.gpo := outVal.asBools
   io.bus.rvalid := RegNext(io.bus.req)
+  io.bus.rdata := RegNext(rdata)
 }

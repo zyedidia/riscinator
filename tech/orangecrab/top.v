@@ -9,7 +9,10 @@ module top
         output wire gpio_0,
         output wire gpio_1,
         output wire gpio_5,
-        output wire gpio_9
+        output wire gpio_9,
+
+        input wire gpio_a0, // rx
+        output wire gpio_a1 // tx
     );
 
     logic locked;
@@ -44,6 +47,8 @@ module top
     `TOP top (
         .clock (clk_sys),
         .reset (!rst_sys_n),
+        .io_rx    (gpio_a0),
+        .io_tx    (gpio_a1),
         .io_gpi_0 (usr_btn_i),
         .io_gpo_0 (led_r),
         .io_gpo_1 (led_g),

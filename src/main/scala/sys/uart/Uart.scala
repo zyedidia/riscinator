@@ -2,65 +2,58 @@ package rtor.sys.uart
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.ChiselEnum
 
-import rtor.lib.fifo.Fifo
+import rtor.bus._
 
-class UartDataIO[T <: Bits](gen: T) extends Bundle {
-  val serial = Input(UInt(1.W))
-  val bits = Output(gen)
+object RegMap {
+  val txdata = 0
+  val rxdata = 4
+  val dvsr = 8
+  val clear = 12
 }
 
-class UartCtrlIO extends Bundle {
-  val tick = Input(Bool())
-  val done = Output(Bool())
-}
-
-object State extends ChiselEnum {
-  val idle, start, data, stop = Value
-}
-
-class Uart(nfifo: Int, oversample: Int) extends Module {
-  val t = UInt(8.W)
-  val dvsrw = 11 // bits of divisor
-  val fifow = 2 // bits of fifo addr
-
-  val io = IO(new Bundle{
-    val dvsr = Input(UInt(dvsrw.W))
-    val tx_full = Output(Bool())
-    val rx_empty = Output(Bool())
-
-    val rd = Input(Bool())
-    val wr = Input(Bool())
-
-    val rx = new UartDataIO(t)
-    val tx = Flipped(new UartDataIO(t))
+class Uart(offset: Int, fifow: Int, addrw: Int, dataw: Int) extends Module {
+  val io = IO(new Bundle {
+    val bus = Flipped(new RwIO(addrw, dataw))
+    val rx = Input(Bool())
+    val tx = Output(Bool())
   })
 
-  val baud = Module(new Baud(dvsrw))
-  baud.io.dvsr := io.dvsr
+  io.bus.gnt := io.bus.req
 
-  val rxer = Module(new Rx(t, 16))
-  rxer.io.data.serial := io.rx.serial
-  rxer.io.ctrl.tick := baud.io.tick
+  val uart = Module(new UartBlock(UInt(8.W), 11, fifow, 16))
+  uart.io.rx.serial := io.rx
+  io.tx := uart.io.tx.serial
 
-  val txer = Module(new Tx(t, 16))
-  txer.io.data.serial := io.tx.serial
-  txer.io.ctrl.tick := baud.io.tick
+  val we = io.bus.req && io.bus.we
 
-  val fifo_rx = Module(new Fifo(t, fifow))
-  fifo_rx.io.rd := io.rd
-  fifo_rx.io.wr := rxer.io.ctrl.done
-  fifo_rx.io.wdata := rxer.io.data.bits
-  io.rx_empty := fifo_rx.io.empty
-  io.rx.bits := fifo_rx.io.rdata
+  def wReg(addr: UInt, width: Int): UInt = {
+    val reg = RegInit(0.U(width.W))
+    when(we && (io.bus.addr(offset, 0) === addr)) {
+      reg := io.bus.wdata
+    }
+    return reg
+  }
 
-  val fifo_tx = Module(new Fifo(t, fifow))
-  fifo_tx.io.rd := txer.io.ctrl.done
-  fifo_tx.io.wr := io.wr
-  fifo_tx.io.wdata := io.tx.bits
-  io.tx_full := fifo_tx.io.full
+  val dvsr = wReg(RegMap.dvsr.U, 11)
+  val addr = RegNext(io.bus.addr(offset, 0))
 
-  txer.io.start := ~fifo_tx.io.empty
-  txer.io.data.bits := fifo_tx.io.rdata
+  val rdata = WireDefault(0.U(dataw.W))
+  switch(addr) {
+    is(RegMap.rxdata.U) {
+      rdata := Cat(0.U(22.W), uart.io.tx_full, uart.io.rx_empty, uart.io.rx.bits)
+    }
+    is(RegMap.dvsr.U) {
+      rdata := dvsr
+    }
+  }
+
+  io.bus.rvalid := RegNext(io.bus.req)
+  io.bus.rdata := RegNext(rdata)
+  io.bus.err := false.B
+
+  uart.io.rd := we && (io.bus.addr(offset, 0) === RegMap.clear.U)
+  uart.io.wr := we && (io.bus.addr(offset, 0) === RegMap.txdata.U)
+  uart.io.tx.bits := io.bus.wdata
+  uart.io.dvsr := dvsr
 }

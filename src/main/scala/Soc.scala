@@ -8,6 +8,7 @@ import rtor.bus._
 import rtor.sys.ram._
 import rtor.sys.gpio._
 import rtor.sys.timer._
+import rtor.sys.uart._
 
 import scala.collection.mutable.ListBuffer
 
@@ -24,6 +25,8 @@ object Mmio {
   val TimerSize = 1024
   val GpioBase = 0x20000
   val GpioSize = 1024
+  val UartBase = 0x30000
+  val UartSize = 1024
 }
 
 class Soc(memFile: String) extends Module {
@@ -32,6 +35,8 @@ class Soc(memFile: String) extends Module {
   val io = IO(new Bundle {
     val gpi = Vec(1, Input(Bool()))
     val gpo = Vec(7, Output(Bool()))
+    val rx = Input(Bool())
+    val tx = Output(Bool())
   })
 
   val boot = Mmio.RamBase.U(xlen.W)
@@ -40,6 +45,7 @@ class Soc(memFile: String) extends Module {
   val ram = Module(new Ram(log2Ceil(Mmio.RamBase) - 1, Mmio.RamSize / 4, xlen, xlen, memFile))
   val timer = Module(new Timer(log2Ceil(Mmio.TimerBase) - 1, xlen, xlen))
   val gpio = Module(new Gpio(log2Ceil(Mmio.GpioBase) - 1, 1, 7, xlen, xlen))
+  val uart = Module(new Uart(log2Ceil(Mmio.UartBase) - 1, 8, xlen, xlen))
 
   val devices = List(
     Device(
@@ -64,6 +70,15 @@ class Soc(memFile: String) extends Module {
         gpio.io.gpo <> io.gpo
         gpio.io.gpi <> io.gpi
         gpio.io.bus
+      }
+    ),
+    Device(
+      Mmio.UartBase,
+      Mmio.UartSize,
+      () => {
+        uart.io.rx := io.rx
+        io.tx := uart.io.tx
+        uart.io.bus
       }
     )
   )

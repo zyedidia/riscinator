@@ -49,7 +49,7 @@ $(PROG).elf: $(OBJ) $(LIBOBJ)
 	$(OBJDUMP) -D $< > $@
 
 clean:
-	rm -f *.o *.elf *.hex *.bin *.list
+	rm -f *.o *.elf *.hex *.bin *.list *.mem
 
 .PHONY: all install clean
 
