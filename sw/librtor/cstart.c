@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "uart.h"
 
 extern int main();
 
@@ -11,6 +12,9 @@ void _cstart() {
     while (bss < bss_end) {
         *bss++ = 0;
     }
+
+    uart_set_baud(115200);
+    init_printf(NULL, uart_putc);
 
     main();
 }

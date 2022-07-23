@@ -26,7 +26,7 @@ all: $(PROGS)
 	$(OBJCOPY) $< -O binary $@
 
 %.mem: %.bin
-	hexdump -e '1/4 "%08x\n"' $< > $@
+	hexdump -v -e '1/4 "%08x\n"' $< > $@
 
 # %.mem: %.elf
 # 	$(OBJCOPY) $< -O verilog $@
