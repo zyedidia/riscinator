@@ -5,7 +5,7 @@ import chisel3.util._
 
 // Uart receiver parameterized by oversampling rate and data width
 class Rx[T <: Bits](gen: T, oversample: Int) extends Module {
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val ctrl = new UartCtrlIO()
     val data = new UartDataIO(gen)
   })
@@ -20,45 +20,45 @@ class Rx[T <: Bits](gen: T, oversample: Int) extends Module {
   io.data.bits := data
 
   io.ctrl.done := false.B
-  switch (state) {
-    is (State.idle) {
-      when (io.data.serial === 0.U) {
+  switch(state) {
+    is(State.idle) {
+      when(io.data.serial === 0.U) {
         state := State.start
         tickC := 0.U
       }
     }
-    is (State.start) {
-      when (io.ctrl.tick) {
-        when (tickC === (oversample / 2 - 1).U) {
+    is(State.start) {
+      when(io.ctrl.tick) {
+        when(tickC === (oversample / 2 - 1).U) {
           tickC := 0.U
           state := State.data
-        } .otherwise {
+        }.otherwise {
           tickC := tickC + 1.U
         }
       }
     }
-    is (State.data) {
-      when (io.ctrl.tick) {
-        when (tickC === (oversample - 1).U) {
+    is(State.data) {
+      when(io.ctrl.tick) {
+        when(tickC === (oversample - 1).U) {
           tickC := 0.U
           data := io.data.serial ## data(7, 1)
 
-          when (dataC === (width - 1).U) {
+          when(dataC === (width - 1).U) {
             state := State.stop
-          } .otherwise {
+          }.otherwise {
             dataC := dataC + 1.U
           }
-        } .otherwise {
+        }.otherwise {
           tickC := tickC + 1.U
         }
       }
     }
-    is (State.stop) {
-      when (io.ctrl.tick) {
-        when (tickC === (oversample - 1).U) {
+    is(State.stop) {
+      when(io.ctrl.tick) {
+        when(tickC === (oversample - 1).U) {
           state := State.idle
           io.ctrl.done := true.B
-        } .otherwise {
+        }.otherwise {
           tickC := tickC + 1.U
         }
       }

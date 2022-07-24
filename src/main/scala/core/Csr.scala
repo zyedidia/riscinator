@@ -112,35 +112,45 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     Csr.mscratch -> RegInit(0.U(xlen.W)),
     Csr.mepc -> Reg(UInt(xlen.W)),
     Csr.mcause -> Reg(UInt(xlen.W)),
-    Csr.mtval -> Reg(UInt(xlen.W)),
+    Csr.mtval -> Reg(UInt(xlen.W))
   )
 
-  // TODO: check privilege level
+  // TODO: additional kinds of faults
+  // counters
+  // user mode reading from legal CSRs (currently all CSRs are inaccessible to user mode)
 
   def isT(t: EnumType) = io.ctrl.csr_type === t
 
   io.rdata := MuxLookup(io.csr, 0.U, regs.toSeq)
   val valid = regs.map(_._1 === io.csr).reduce(_ || _)
   val wen = isT(CsrType.w) || isT(CsrType.s) || isT(CsrType.c) && io.rs1 =/= 0.U
-  val wdata = MuxCase(0.U, Array(
-    isT(CsrType.w) -> io.wdata,
-    isT(CsrType.s) -> (io.rdata | io.wdata),
-    isT(CsrType.c) -> (io.rdata & ~io.wdata),
-  ))
+  val wdata = MuxCase(
+    0.U,
+    Array(
+      isT(CsrType.w) -> io.wdata,
+      isT(CsrType.s) -> (io.rdata | io.wdata),
+      isT(CsrType.c) -> (io.rdata & ~io.wdata)
+    )
+  )
+  val priv_valid = priv === Priv.m
+  val isE = isT(CsrType.ec) || isT(CsrType.eb) || isT(CsrType.er)
 
-  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal
+  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal || (!priv_valid && !isE)
 
   io.epc.bits := DontCare
   io.epc.valid := false.B
 
   when(exception) {
     regs(Csr.mepc) := io.pc >> 2 << 2
-    regs(Csr.mcause) := MuxCase(DontCare, Array(
-      (isT(CsrType.ec) && priv === Priv.m) -> Cause.ecallM,
-      (isT(CsrType.ec) && priv === Priv.u) -> Cause.ecallU,
-      isT(CsrType.eb) -> Cause.breakpoint,
-      io.ctrl.illegal -> Cause.illegalInst
-    ))
+    regs(Csr.mcause) := MuxCase(
+      DontCare,
+      Array(
+        (isT(CsrType.ec) && priv === Priv.m) -> Cause.ecallM,
+        (isT(CsrType.ec) && priv === Priv.u) -> Cause.ecallU,
+        isT(CsrType.eb) -> Cause.breakpoint,
+        io.ctrl.illegal -> Cause.illegalInst
+      )
+    )
     priv := Priv.m
     mie := false.B
     mpie := mie
@@ -172,8 +182,8 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
         msi.e := wdata(3)
       }
       is(Csr.mscratch) { regs(Csr.mscratch) := wdata }
-      is(Csr.mtvec) { regs(Csr.mtvec) := wdata }
-      is(Csr.mepc) { regs(Csr.mepc) := wdata >> 2.U << 2.U }
+      is(Csr.mtvec)    { regs(Csr.mtvec) := wdata }
+      is(Csr.mepc)     { regs(Csr.mepc) := wdata >> 2.U << 2.U }
       // XXX: can anything be written to mcause?
       is(Csr.mcause) { regs(Csr.mcause) := wdata }
     }

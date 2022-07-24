@@ -21,7 +21,7 @@ object State extends ChiselEnum {
 }
 
 class UartBlock[T <: Bits](gen: T, dvsrw: Int, fifow: Int, oversample: Int) extends Module {
-  val io = IO(new Bundle{
+  val io = IO(new Bundle {
     val dvsr = Input(UInt(dvsrw.W))
     val tx_full = Output(Bool())
     val rx_empty = Output(Bool())

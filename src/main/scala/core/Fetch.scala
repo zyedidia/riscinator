@@ -32,7 +32,7 @@ class Fetch(xlen: Int, bootAddr: UInt) extends Module {
 
   when(io.epc.valid) {
     next := io.epc.bits
-  } .elsewhen(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
+  }.elsewhen(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
     next := pc
   }.elsewhen(io.ctrl.pc_sel === PcSel.alu || io.br_taken) {
     next := io.alu_out & ~(1.U(xlen.W))
