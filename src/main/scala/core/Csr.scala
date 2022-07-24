@@ -134,8 +134,9 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
   )
   val priv_valid = priv === Priv.m
   val isE = isT(CsrType.ec) || isT(CsrType.eb) || isT(CsrType.er)
+  val illegal_priv = !priv_valid && !isE
 
-  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal || (!priv_valid && !isE)
+  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal || illegal_priv
 
   io.epc.bits := DontCare
   io.epc.valid := false.B
@@ -148,7 +149,8 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
         (isT(CsrType.ec) && priv === Priv.m) -> Cause.ecallM,
         (isT(CsrType.ec) && priv === Priv.u) -> Cause.ecallU,
         isT(CsrType.eb) -> Cause.breakpoint,
-        io.ctrl.illegal -> Cause.illegalInst
+        io.ctrl.illegal -> Cause.illegalInst,
+        illegal_priv -> Cause.illegalInst
       )
     )
     priv := Priv.m
