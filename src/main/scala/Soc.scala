@@ -20,7 +20,7 @@ case class Device(base: Int, size: Int, busIO: () => RwIO) {
 
 object Mmio {
   val RamBase = 0x100000
-  val RamSize = 16 * 1024
+  val RamSize = 8 * 1024
   val TimerBase = 0x10000
   val TimerSize = 1024
   val GpioBase = 0x20000
@@ -42,7 +42,7 @@ class Soc(memFile: String) extends Module {
   val boot = Mmio.RamBase.U(xlen.W)
   val core = Module(new Core(Config(xlen, boot)))
 
-  val ram = Module(new Ram(log2Ceil(Mmio.RamSize) - 1, Mmio.RamSize / 4, xlen, xlen, memFile))
+  val ram = Module(new Ram(log2Ceil(Mmio.RamSize) - 1, Mmio.RamSize, xlen, xlen, memFile))
   val timer = Module(new Timer(log2Ceil(Mmio.TimerSize) - 1, xlen, xlen))
   val gpio = Module(new Gpio(log2Ceil(Mmio.GpioSize) - 1, 1, 7, xlen, xlen))
   val uart = Module(new Uart(log2Ceil(Mmio.UartSize) - 1, 3, xlen, xlen))
@@ -101,5 +101,5 @@ object Soc extends App {
   if (args.length == 0) {
     throw new Exception("no memory file provided")
   }
-  (new chisel3.stage.ChiselStage).emitVerilog(new Soc(args(0)), Array("--target-dir", "generated"))
+  (new chisel3.stage.ChiselStage).emitChirrtl(new Soc(args(0)), Array("--target-dir", "generated"))
 }
