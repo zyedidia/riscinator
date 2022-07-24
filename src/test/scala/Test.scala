@@ -118,8 +118,6 @@ class SocSim extends AnyFlatSpec with ChiselScalatestTester {
       Seq(
         chiseltest.VerilatorBackendAnnotation,
         chiseltest.WriteVcdAnnotation
-        // treadle.WriteVcdAnnotation,
-        // treadle.MemoryToVCD("all")
       )
     ) { dut =>
       for (i <- 1 to 5) {

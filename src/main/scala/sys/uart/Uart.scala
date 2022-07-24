@@ -36,7 +36,7 @@ class Uart(offset: Int, fifow: Int, addrw: Int, dataw: Int) extends Module {
   }
 
   val dvsr = wReg(RegMap.dvsr.U, 11)
-  val addr = RegNext(io.bus.addr(offset, 0))
+  val addr = io.bus.addr(offset, 0)
 
   val rdata = WireDefault(0.U(dataw.W))
   switch(addr) {

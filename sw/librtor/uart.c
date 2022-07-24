@@ -21,27 +21,27 @@ static volatile uart_reg_t* const uart = (uart_reg_t*) 0x30000;
 
 void uart_set_baud(int baud) {
     uint32_t dvsr = CLK_FREQ_MHZ*1000000 / 16 / baud - 1;
-    uart->dvsr = dvsr;
+    put32(&uart->dvsr, dvsr);
 }
 
 int uart_rx_empty() {
-    return bit_get(uart->rx_data, BIT_EMPTY);
+    return bit_get(get32(&uart->rx_data), BIT_EMPTY);
 }
 
 int uart_tx_full() {
-    return bit_get(uart->rx_data, BIT_FULL);
+    return bit_get(get32(&uart->rx_data), BIT_FULL);
 }
 
 void uart_tx(uint8_t byte) {
     while (uart_tx_full()) {}
-    uart->tx_data = (uint32_t) byte;
+    put32(&uart->tx_data, (uint32_t) byte);
 }
 
 int uart_rx() {
     if (uart_rx_empty()) {
         return -1;
     }
-    uint32_t data = bits_get(uart->rx_data, BIT_DATA_LOW, BIT_DATA_HIGH);
+    uint32_t data = bits_get(get32(&uart->rx_data), BIT_DATA_LOW, BIT_DATA_HIGH);
     put32(&uart->clear, 0);
     return (int) data;
 }
