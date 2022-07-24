@@ -93,6 +93,21 @@ class SocTest extends AnyFlatSpec with ChiselScalatestTester {
       assert(peekAt(dut.ram.mem, 2) == 67)
     })
   }
+  "csr" should "pass" in {
+    test(new rtor.Soc("./tests/csr.mem")).runPeekPoke(new PeekPokeTester(_) {
+      for (i <- 1 to 1000) {
+        step(1)
+      }
+
+      var regs = Array.fill[Long](32)(0)
+      regs(1) = 1
+      regs(2) = 1
+
+      for (i <- 0 until 32) {
+        assert(regs(i) == peekAt(dut.core.rf.regs, i), s"error: reg $i expected ${regs(i)}")
+      }
+    })
+  }
 }
 
 class SocSim extends AnyFlatSpec with ChiselScalatestTester {
