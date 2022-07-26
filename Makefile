@@ -23,11 +23,11 @@ generated:
 ifeq ($(FIRTOOL),0)
 generated/$(TOP).v: $(SRC) generated
 	$(MAKE) -C sw/$(SW)
-	$(SBT) run $(MEM)
+	$(SBT) runMain rtor.$(TOP) $(MEM)
 else
 generated/$(TOP).v: $(SRC) generated
 	$(MAKE) -C sw/$(SW)
-	$(SBT) run $(MEM)
+	$(SBT) runMain rtor.$(TOP) $(MEM)
 	firtool -o $@ generated/$(TOP).fir --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 endif
 
@@ -50,7 +50,7 @@ include tech/$(TECH)/rules.mk
 endif
 
 clean:
-	rm -rf generated
+	rm -rf generated test_run_dir
 	$(MAKE) -C tests clean
 	$(MAKE) -C sw/$(SW) clean
 	$(BOARDCLEAN)
