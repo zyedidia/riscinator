@@ -35,3 +35,5 @@ test_run_dir
 conf.mk
 todo.txt
 notes.txt
+
+.verilator

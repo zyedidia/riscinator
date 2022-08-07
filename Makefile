@@ -6,6 +6,7 @@ SW ?= dummy
 TOP = Soc
 SBT = sbt --client
 FIRTOOL ?= 0
+VDIR = .verilator
 
 SRC = $(shell find ./src/main/scala -name "*.scala")
 TEST = $(shell find ./src/test/scala -name "*.scala")
@@ -20,6 +21,9 @@ check:
 generated:
 	mkdir -p generated
 
+$(VDIR):
+	mkdir -p $(VDIR)
+
 ifeq ($(FIRTOOL),0)
 generated/$(TOP).v: $(SRC) generated
 	$(MAKE) -C sw/$(SW)
@@ -31,9 +35,12 @@ generated/$(TOP).v: $(SRC) generated
 	firtool -o $@ generated/$(TOP).fir --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 endif
 
-test:
+$(VDIR)/tb: tests/tb.cc generated/$(TOP).v $(VDIR)
+	verilator --public -sv -cc -Mdir $(VDIR) generated/$(TOP).v generated/Memory.v --top $(TOP) --exe --build $< -o tb
+
+test: $(VDIR)/tb
 	$(MAKE) -C tests
-	$(SBT) "testOnly *SocTest"
+	./$(VDIR)/tb
 
 sim:
 	$(MAKE) -C tests
