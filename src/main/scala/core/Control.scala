@@ -137,17 +137,23 @@ class Control extends Module {
 
   val signals = decoder(io.inst, decode.TruthTable(bitpats, default, false))
 
-  io.pc_sel := PcSel(signals(0))
-  io.a_sel := ASel(signals(1))
-  io.b_sel := BSel(signals(2))
-  io.imm_sel := ImmSel(signals(3))
-  io.alu_op := AluOp(signals(4))
-  io.br_type := BrType(signals(5))
+  def get[T](gen: UInt => (T, Bool), v: UInt): T = {
+    val (x, valid) = gen(v)
+    assert(valid)
+    x
+  }
+
+  io.pc_sel := get(PcSel.safe, signals(0))
+  io.a_sel := get(ASel.safe, signals(1))
+  io.b_sel := get(BSel.safe, signals(2))
+  io.imm_sel := get(ImmSel.safe, signals(3))
+  io.alu_op := get(AluOp.safe, signals(4))
+  io.br_type := get(BrType.safe, signals(5))
   io.inst_kill := signals(6)
-  io.st_type := StType(signals(7))
-  io.ld_type := LdType(signals(8))
-  io.wb_sel := WbSel(signals(9))
+  io.st_type := get(StType.safe, signals(7))
+  io.ld_type := get(LdType.safe, signals(8))
+  io.wb_sel := get(WbSel.safe, signals(9))
   io.wb_en := signals(10)
   io.illegal := signals(11)
-  io.csr_type := CsrType(signals(12))
+  io.csr_type := get(CsrType.safe, signals(12))
 }
