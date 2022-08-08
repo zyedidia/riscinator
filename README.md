@@ -19,6 +19,10 @@ Clone the repository:
 git clone --recursive https://github.com/zyedidia/riscinator
 ```
 
+Chisel uses [espresso](https://github.com/chipsalliance/espresso) for logic
+minimization, so you must install it to build Riscinator. Run `mkdir build; cd
+build; cmake ..; make` and then copy the built binary onto your PATH.
+
 The makefile has the following targets:
 
 * `make`/`make build`: generate FIRRTL and Verilog in `generated/`.
