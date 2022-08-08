@@ -74,13 +74,13 @@ class Core(conf: Config) extends Module {
   control.io.inst := fe.inst
   execute.io.data.inst := fe.inst
 
-  execute.io.ctrl.imm_sel := control.io.imm_sel
-  execute.io.ctrl.ld_type := control.io.ld_type
-  execute.io.ctrl.st_type := control.io.st_type
-  execute.io.ctrl.alu_op := control.io.alu_op
-  execute.io.ctrl.a_sel := control.io.a_sel
-  execute.io.ctrl.b_sel := control.io.b_sel
-  execute.io.ctrl.br_type := control.io.br_type
+  execute.io.ctrl.imm_sel := control.io.sig.imm_sel
+  execute.io.ctrl.ld_type := control.io.sig.ld_type
+  execute.io.ctrl.st_type := control.io.sig.st_type
+  execute.io.ctrl.alu_op := control.io.sig.alu_op
+  execute.io.ctrl.a_sel := control.io.sig.a_sel
+  execute.io.ctrl.b_sel := control.io.sig.b_sel
+  execute.io.ctrl.br_type := control.io.sig.br_type
 
   execute.io.data.pc := fe.pc
 
@@ -92,13 +92,13 @@ class Core(conf: Config) extends Module {
   io.dmem <> execute.io.dmem
 
   val ew = new {
-    val wb_sel = RegEnable(control.io.wb_sel, !stall)
-    val wb_en = RegEnable(control.io.wb_en, !stall)
-    val ld_type = RegEnable(control.io.ld_type, !stall)
-    val csr_type = RegEnable(control.io.csr_type, !stall)
-    val st_type = RegEnable(control.io.st_type, !stall)
-    val pc_sel = RegEnable(control.io.pc_sel, !stall)
-    val illegal = RegEnable(control.io.illegal, !stall)
+    val wb_sel = RegEnable(control.io.sig.wb_sel, !stall)
+    val wb_en = RegEnable(control.io.sig.wb_en, !stall)
+    val ld_type = RegEnable(control.io.sig.ld_type, !stall)
+    val csr_type = RegEnable(control.io.sig.csr_type, !stall)
+    val st_type = RegEnable(control.io.sig.st_type, !stall)
+    val pc_sel = RegEnable(control.io.sig.pc_sel, !stall)
+    val illegal = RegEnable(control.io.sig.illegal, !stall)
 
     val rd = RegEnable(execute.io.data.rd, !stall)
     val ld = io.dmem.rdata
@@ -133,7 +133,7 @@ class Core(conf: Config) extends Module {
   rf.io.waddr := writeback.io.rf.waddr
   rf.io.wdata := writeback.io.rf.wdata
 
-  fetch.io.ctrl.pc_sel := control.io.pc_sel
+  fetch.io.ctrl.pc_sel := control.io.sig.pc_sel
   fetch.io.alu_out := execute.io.data.alu_out
   fetch.io.ctrl.stall := stall
   fetch.io.epc := csr.io.epc
@@ -151,5 +151,5 @@ class Core(conf: Config) extends Module {
   fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs2, ew.rd), execute.io.rf.rs2r, ew.alu_out)
 
   // flush the pipeline for slow instructions (loads) and when branches are taken
-  flush := control.io.inst_kill || execute.io.data.br_taken || started
+  flush := control.io.sig.inst_kill || execute.io.data.br_taken || started
 }
