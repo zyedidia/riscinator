@@ -54,7 +54,7 @@ object Control {
   //                                                                                     inst_kill                              wb_en illegal
   //                                                                                        |                                       |  |
   val default = L(List(PcSel.plus4, ASel.none,  BSel.none, ImmSel.x, AluOp.none, BrType.none, N, StType.none, LdType.none, WbSel.alu, N, Y, CsrType.n))
-  val map = Array(
+  val insts = Array(
     LUI   -> L(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.copyB, BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
     AUIPC -> L(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.add,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
     JAL   -> L(List(PcSel.alu,   ASel.pc,   BSel.imm,  ImmSel.j, AluOp.add,   BrType.none, Y, StType.none, LdType.none, WbSel.pc4, Y, N, CsrType.n)),
@@ -132,7 +132,7 @@ class Control extends Module {
     l.map(y => BitPat(y.asUInt)).reduce((a, b) => a ## b)
   }
 
-  val bitpats = Control.map.map(x => (x._1 -> toBitPat(x._2)))
+  val bitpats = Control.insts.map(x => (x._1 -> toBitPat(x._2)))
   val default = toBitPat(Control.default)
 
   val signals = decoder(io.inst, decode.TruthTable(bitpats, default, false))
