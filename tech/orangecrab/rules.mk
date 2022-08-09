@@ -2,7 +2,7 @@ CONS=tech/orangecrab/orangecrab.lpf
 WRAP=tech/orangecrab/top.v tech/orangecrab/pll.v
 REPORT=report.json
 
-VSRC = $(wildcard generated/*.v)
+VSRC = generated/$(TOP).v generated/Memory.v
 
 BOARDCLEAN=rm -f *.dfu *.bit *.json *_out.config $(REPORT)
 
