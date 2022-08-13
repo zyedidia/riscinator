@@ -1,0 +1,2 @@
+prog := blink
+dofile("../librtor/rules.knit")

@@ -1,0 +1,2 @@
+prog := ecall
+dofile("../librtor/rules.knit")

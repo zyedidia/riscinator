@@ -1,0 +1,50 @@
+knit = import("knit")
+
+top = cli.top or "Soc"
+prog = cli.prog or "dummy"
+mem = f"sw/$prog/$prog.mem"
+
+sbt = "sbt --client"
+firtool = tobool(cli.firtool) or false
+debug = tobool(cli.debug) or false
+gen = "generated"
+
+src = knit.rglob("./src/main/scala", "*.scala")
+test = knit.rglob("./src/test/scala", "*.scala")
+
+opts = table.concat({
+    "noAlwaysComb",
+    "disallowPackedArrays",
+    "disallowLocalVariables",
+}, ",")
+
+O = debug and "debug" or "release"
+
+firflags = f"-O=$O --annotation-file=$gen/$top.anno.json --disable-annotation-unknown --lowering-options=$opts"
+
+$ build:V: $gen/$top.v
+
+$ $mem:
+    knit -C sw/$prog
+
+if not firtool then
+$ $gen/$top.v: $src $gen $mem
+    $sbt runMain rtor.$top $mem
+else
+$ $gen/$top.v: $src $gen $mem
+    $sbt runMain rtor.$top $mem
+    firtool $firflags -o $output $gen/$top.fir
+end
+
+$ format:V:
+    $sbt scalafmtAll
+
+$ shutdown:V:
+    $sbt shutdown
+
+$ $gen:
+    mkdir -p $output
+
+$ clean:
+    rm -rf generated test_run_dir
+    knit -C sw/$prog clean

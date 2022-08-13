@@ -1,0 +1,5 @@
+$ dummy.mem:
+    echo 00000063 > $output
+
+$ clean:
+    rm -f dummy.mem

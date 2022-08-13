@@ -1,0 +1,52 @@
+knit = import("knit")
+
+prefix = "riscv64-unknown-elf"
+
+cc = f"$prefix-gcc"
+as = f"$prefix-as"
+ld = f"$prefix-ld"
+objcopy = f"$prefix-objcopy"
+objdump = f"$prefix-objdump"
+
+librtor = knit.shell("git rev-parse --show-toplevel") .. "/sw/librtor"
+include = "-I" .. librtor
+arch = "rv32i"
+O = "s"
+
+cflags = f"-O$O $include -g -Wall -Wno-unused-function -nostdlib -nostartfiles -ffreestanding -march=$arch -mabi=ilp32 -std=gnu99 -mcmodel=medany"
+asflags = f"-march=$arch -mabi=ilp32"
+ldflags = f"-T $librtor/memmap.ld -melf32lriscv"
+libgcc = knit.shell(f"$cc $cflags --print-file-name=libgcc.a")
+
+libcsrc = knit.join(knit.glob(f"$librtor/*.c"), knit.glob(f"$librtor/libc/*.c"))
+libssrc = knit.glob(f"$librtor/*.s")
+libobj = knit.join(knit.extrepl(libcsrc, ".c", ".o"), knit.extrepl(libssrc, ".s", ".o"))
+
+src = knit.glob("*.c")
+obj = knit.extrepl(src, ".c", ".o")
+
+$ all:V: $prog.mem
+
+$ $prog.mem: $prog.bin
+    hexdump -v -e '1/4 "%08x\n"' $input > $output
+
+$ %.o: %.c
+    $cc $cflags -c $input -o $output
+
+$ %.o: %.s
+    $as $asflags $input -c -o $output
+
+$ $prog.elf: $obj $libobj
+    $ld $ldflags $libobj $obj $libgcc -o $output
+
+$ %.bin: %.elf
+    $objcopy $input -O binary $output
+
+$ %.hex: %.elf
+    $objcopy $input -O ihex $output
+
+$ %.list: %.elf
+    $objdump -D $input > $output
+
+$ clean:V:
+    rm -f *.o *.elf *.hex *.bin *.list *.mem

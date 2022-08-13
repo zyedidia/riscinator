@@ -1,0 +1,2 @@
+prog := hello
+dofile("../librtor/rules.knit")
