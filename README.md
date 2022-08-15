@@ -1,6 +1,6 @@
-# Riscinator 5000
+# Riscinator
 
-The Riscinator 5000 is a simple RISC-V core implemented in Chisel. It is meant
+Riscinator is a simple RISC-V core implemented in Chisel. It is meant
 for learning Chisel, and for experimenting with new Chisel features. The core
 is a 3-stage pipeline implementing the rv32i unprivileged instruction set in
 under 500 lines of code. The system as a whole also includes a simple bus and
@@ -48,7 +48,7 @@ and run `make synth` to generate a blink program for the OrangeCrab FPGA.
 
 # Future
 
-The Riscinator 5000 is not complete yet, and I plan to add the following
+The Riscinator is not complete yet, and I plan to add the following
 enhancements:
 
 * CSR and privileged ISA support (possibly including interrupts).
