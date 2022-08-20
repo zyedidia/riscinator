@@ -1,9 +1,9 @@
 # Riscinator
 
-Riscinator is a simple RISC-V core implemented in Chisel. It is meant
-for learning Chisel, and for experimenting with new Chisel features. The core
-is a 3-stage pipeline implementing the rv32i unprivileged instruction set in
-under 500 lines of code. The system as a whole also includes a simple bus and
+Riscinator is a simple RISC-V core implemented in Chisel. It is meant for
+learning Chisel, and for experimenting with new Chisel features. The core is a
+3-stage pipeline implementing the rv32i unprivileged instruction set in under
+1000 lines of code. The system as a whole also includes a simple bus and
 arbiter, 16K of SRAM memory, and timer, UART, and GPIO modules. There is a
 bare-metal C library with drivers for the devices on the system. An example
 program in `sw/blink` blinks pin 0 using the timer.
@@ -16,7 +16,7 @@ FPGA.
 Clone the repository:
 
 ```
-git clone --recursive https://github.com/zyedidia/riscinator
+git clone https://github.com/zyedidia/riscinator
 ```
 
 The makefile has the following targets:
@@ -29,12 +29,10 @@ The makefile has the following targets:
 The tests and example programs require you to have a RISC-V GNU toolchain
 installed.
 
-You can also use the MLIR-based FIRRTL compiler `firtool` from the
-[CIRCT](https://github.com/llvm/circt) project by setting `FIRTOOL=1` in the
-makefile. Note: you need to use a patched version of firtool that has support
-for the memory initialization annotation. I distribute binaries with support
-from [here](https://github.com/zyedidia/circt-builder). To download one with eget, use
-`eget zyedidia/circt-builder -f firtool -a readmem`
+You must also have the MLIR-based FIRRTL compiler `firtool` installed. You can
+install it from the prebuilt releases at
+[llvm/circt](https://github.com/llvm/circt). Eget can automatically install it
+for you with `eget llvm/circt -f firtool`.
 
 By default the makefile generates the design to run an empty program. If you
 have the appropriate tools installed, create a `conf.mk` file containing:
