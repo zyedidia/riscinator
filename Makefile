@@ -5,7 +5,7 @@ SW ?= dummy
 
 TOP = Soc
 SBT = sbt --client
-FIRTOOL ?= 0
+FIRTOOL ?= 1
 VDIR = .verilator
 
 SRC = $(shell find ./src/main/scala -name "*.scala")
@@ -13,7 +13,7 @@ TEST = $(shell find ./src/test/scala -name "*.scala")
 
 MEM = sw/$(SW)/$(SW).mem
 
-build: generated/$(TOP).v
+build: generated/$(TOP)
 
 check:
 	$(SBT) compile
@@ -24,19 +24,15 @@ generated:
 $(VDIR):
 	mkdir -p $(VDIR)
 
-ifeq ($(FIRTOOL),0)
-generated/$(TOP).v: $(SRC) generated
-	$(MAKE) -C sw/$(SW)
-	$(SBT) runMain rtor.$(TOP) $(MEM)
-else
-generated/$(TOP).v: $(SRC) generated
-	$(MAKE) -C sw/$(SW)
-	$(SBT) runMain rtor.$(TOP) $(MEM)
-	firtool -o $@ generated/$(TOP).fir --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
-endif
+FIRFLAGS = --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 
-$(VDIR)/tb: tests/tb.cc generated/$(TOP).v $(VDIR)
-	verilator --public -sv -cc -Mdir $(VDIR) generated/$(TOP).v generated/Memory.v --top $(TOP) --exe --build $< -o tb
+generated/$(TOP): $(SRC) generated
+	$(MAKE) -C sw/$(SW)
+	$(SBT) runMain rtor.$(TOP) $(MEM)
+	firtool --split-verilog -o generated/$(TOP) generated/$(TOP).fir $(FIRFLAGS)
+
+$(VDIR)/tb: tests/tb.cc generated/$(TOP) $(VDIR)
+	verilator --public -sv -cc -Mdir $(VDIR) generated/$(TOP)/*.sv --top $(TOP) --exe --build $< -o tb
 
 test: $(VDIR)/tb
 	$(MAKE) -C tests

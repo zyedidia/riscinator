@@ -1,6 +1,6 @@
 scalaVersion := "2.12.13"
 
-val chiselVersion = "3.5.1"
+val chiselVersion = "3.5.4"
 
 scalacOptions ++= Seq(
   "-deprecation",

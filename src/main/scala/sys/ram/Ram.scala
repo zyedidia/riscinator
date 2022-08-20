@@ -21,7 +21,7 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
       val drdata = Output(UInt(dataw.W))
     })
 
-    setInline("Memory.v",
+    setInline("Memory.sv",
       s"""
       module Memory(
         input logic clock,
