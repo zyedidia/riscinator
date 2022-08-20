@@ -15,6 +15,7 @@ test_run_dir
 *.dfu
 *.list
 *.elf
+*_mem.h
 
 # Scala IDEs
 .project

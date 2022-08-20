@@ -18,24 +18,25 @@ build: generated/$(TOP)
 check:
 	$(SBT) compile
 
-generated:
-	mkdir -p generated
-
 $(VDIR):
 	mkdir -p $(VDIR)
 
-FIRFLAGS = --annotation-file=generated/$(TOP).anno.json --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
+FIRFLAGS = --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
 
-generated/$(TOP): $(SRC) generated
+generated/Core: $(SRC)
+	mkdir -p generated
+	$(SBT) runMain rtor.Core
+	firtool --split-verilog -o $@ $@.fir --annotation-file=$@.anno.json $(FIRFLAGS)
+
+generated/Soc: $(SRC)
+	mkdir -p generated
 	$(MAKE) -C sw/$(SW)
-	$(SBT) runMain rtor.$(TOP) $(MEM)
-	firtool --split-verilog -o generated/$(TOP) generated/$(TOP).fir $(FIRFLAGS)
+	$(SBT) runMain rtor.Soc $(MEM)
+	firtool --split-verilog -o $@ $@.fir --annotation-file=$@.anno.json $(FIRFLAGS)
 
-$(VDIR)/tb: tests/tb.cc generated/$(TOP) $(VDIR)
-	verilator --public -sv -cc -Mdir $(VDIR) generated/$(TOP)/*.sv --top $(TOP) --exe --build $< -o tb
-
-test: $(VDIR)/tb
+test: tests/tb.cc
 	$(MAKE) -C tests
+	verilator --public -sv -cc -Mdir $(VDIR) generated/Core/*.sv --top Core --exe --build $< -o tb
 	./$(VDIR)/tb
 
 sim:

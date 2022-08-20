@@ -12,7 +12,7 @@ ASFLAGS = -march=$(ARCH) -mabi=ilp32
 LDFLAGS = -T $(LIBRTOR_ROOT)/memmap.ld -melf32lriscv
 
 SRCS = $(wildcard *.s)
-PROGS = $(SRCS:.s=.mem)
+PROGS = $(SRCS:.s=.mem) $(SRCS:.s=_mem.h)
 
 all: $(PROGS)
 
@@ -25,6 +25,9 @@ all: $(PROGS)
 %.bin: %.elf
 	$(OBJCOPY) $< -O binary $@
 
+%_mem.h: %.bin
+	xxd --include $< > $@
+
 %.mem: %.bin
 	hexdump -v -e '1/4 "%08x\n"' $< > $@
 
@@ -35,6 +38,6 @@ all: $(PROGS)
 	$(OBJDUMP) -D $< > $@
 
 clean:
-	rm -f *.mem
+	rm -f *.mem *_mem.h
 
 .PHONY: all clean

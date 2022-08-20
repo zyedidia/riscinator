@@ -15,11 +15,16 @@ addi x5, x0, 0
 around: slt x4, x7, x2
 add x7, x4, x5
 sub x7, x7, x2
-sw x7, 84(x3)
-lw x2, 96(x0)
+li x10, 0x100100
+add x10, x3, x10
+sw x7, 84(x10)
+li x20, 0x100100
+lw x2, 96(x20)
 add x9, x2, x5
 jal x3, end
 addi x2, x0, 1
 end: add x2, x2, x9
-sw x2, 0x20(x3)
+li x10, 0x100100
+add x10, x3, x10
+sw x2, 0x20(x10)
 done: beq x2, x2, done
