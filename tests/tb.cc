@@ -170,5 +170,6 @@ int main(int argc, char **argv) {
     jmps();
 
     if (failed) return 1;
+    printf("ALL TESTS PASSED\n");
     return 0;
 }
