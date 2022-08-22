@@ -63,7 +63,7 @@ object Control {
       _.wb_sel -> sig(9),
       _.wb_en -> sig(10),
       _.illegal -> sig(11),
-      _.csr_type -> sig(12),
+      _.csr_type -> sig(12)
     )
   }
 

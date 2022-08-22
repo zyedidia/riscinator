@@ -16,6 +16,7 @@ test_run_dir
 *.list
 *.elf
 *_mem.h
+.knit
 
 # Scala IDEs
 .project

@@ -9,7 +9,9 @@ import chisel3.util.HasBlackBoxInline
 import rtor.bus._
 
 class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") extends Module {
-  class Memory(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") extends BlackBox with HasBlackBoxInline {
+  class Memory(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "")
+      extends BlackBox
+      with HasBlackBoxInline {
     val io = IO(new Bundle {
       val clock = Input(Clock())
       val we = Input(Bool())
@@ -21,14 +23,15 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
       val drdata = Output(UInt(dataw.W))
     })
 
-    setInline("Memory.sv",
+    setInline(
+      "Memory.sv",
       s"""
       module Memory(
         input logic clock,
         input logic we,
         input logic [${addrw - 1}:0] iaddr,
         input logic [${addrw - 1}:0] daddr,
-        input logic [${dataw/8 - 1}:0] be,
+        input logic [${dataw / 8 - 1}:0] be,
         input logic [${dataw - 1}:0] wdata,
         output logic [${dataw - 1}:0] irdata,
         output logic [${dataw - 1}:0] drdata
@@ -57,7 +60,8 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
             drdata <= mem[daddr >> 2];
         end
       endmodule
-      """.stripMargin)
+      """.stripMargin
+    )
   }
 
   val io = IO(new Bundle {

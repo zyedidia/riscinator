@@ -1,0 +1,35 @@
+local knit = import("knit")
+
+local chisel = require "build/chisel"
+
+top = cli.top or "Soc"
+sbt := sbt --client
+src = knit.rglob("src/main/scala/", "*.scala")
+gen := generated
+mem = cli.mem or "sw/dummy/dummy.mem"
+
+local build = chisel.build(src, sbt, f"rtor.$top", top, gen, mem)
+local format = chisel.format(sbt, gen)
+
+local rules = r(
+    {
+        $ build:V: $gen/$top/$top.sv
+    },
+    build,
+    format
+)
+
+tech = cli.tech or ""
+if tech == "orangecrab" then
+    local oc = require "build/orangecrab"
+    rules = r(rules.Rules, oc.build(
+        "tech/orangecrab/orangecrab.lpf",
+        knit.glob("tech/orangecrab/*.v"),
+        top,
+        f"$gen/$top/*.sv $gen/$top/generated/*.sv",
+        f"$gen/$top/$top.sv",
+        tobool(cli.quiet or true)
+    ))
+end
+
+return rules
