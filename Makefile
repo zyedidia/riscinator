@@ -34,9 +34,9 @@ generated/Soc: $(SRC)
 	$(SBT) runMain rtor.Soc $(MEM)
 	firtool --split-verilog -o $@ $@.fir --annotation-file=$@.anno.json $(FIRFLAGS)
 
-test: tests/tb.cc
+test: tests/tb.cc generated/Core
 	$(MAKE) -C tests
-	verilator --public -sv -cc -Mdir $(VDIR) generated/Core/*.sv --top Core --exe --build $< -o tb
+	verilator -sv -cc -Mdir $(VDIR) generated/Core/*.sv --top Core --exe --build $< -o tb
 	./$(VDIR)/tb
 
 sim:
