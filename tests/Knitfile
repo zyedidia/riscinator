@@ -1,0 +1,28 @@
+local knit = import("knit")
+
+local c = include("../build/c.lua")
+local riscv = include("../build/riscv.lua")
+
+local rvcfg = riscv.config("../sw/librtor/memmap.ld")
+local rvtools = c.toolchain(rvcfg.prefix)
+
+local src = knit.glob("*.s")
+local mem = knit.extrepl(src, ".s", ".mem")
+local memhdr = knit.extrepl(src, ".s", "_mem.h")
+
+local crules = c.rules(rvtools, rvcfg.flags)
+
+return r({
+$ mem:V: $mem
+
+$ hdr:V: $memhdr
+
+$ %_mem.h: %.bin
+    xxd --include $input > $output
+
+$ %.elf: %.o
+    $(rvtools.ld) $(rvcfg.flags.ld) $input -o $output
+
+$ clean:VB:
+    rm -f *.o *.elf *.mem *_mem.h *.bin
+}, crules)

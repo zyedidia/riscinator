@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <vector>
 #include "VCore.h"
+#include "VCore___024root.h"
 #include "verilated.h"
 
 #include "itype_mem.h"
@@ -82,7 +83,7 @@ static void simulate(VCore* core, uint32_t* mem, size_t len, size_t mem_base, ch
     }
 
     for (auto v : check->regs) {
-        auto got = core->Core__DOT__rf__DOT__regs_ext__DOT__Memory[v.idx]; 
+        auto got = core->rootp->Core__DOT__rf__DOT__regs_ext__DOT__Memory[v.idx];
         auto expected = v.value;
         if (got != expected) {
             printf("FAIL: regs[%d]: %d != %d\n", v.idx, got, expected);

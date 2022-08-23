@@ -6,7 +6,8 @@ top = cli.top or "Soc"
 sbt := sbt --client
 src = knit.rglob("src/main/scala/", "*.scala")
 gen := generated
-mem = cli.mem or "sw/dummy/dummy.mem"
+prog = cli.prog or "blink"
+mem = f"sw/$prog/$prog.mem"
 
 local build = chisel.build(src, sbt, "rtor", top, gen, mem)
 local format = chisel.format(sbt, gen)
@@ -14,7 +15,8 @@ local format = chisel.format(sbt, gen)
 local verilator = require "build/verilator"
 
 local verilogCore = f"$gen/Core/*.sv"
-local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core/Core.sv")
+local subtests = include("tests/Knitfile")
+local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core/Core.sv [$subtests][tests]hdr")
 
 local rules = r(
     {
@@ -27,7 +29,7 @@ local rules = r(
 
 local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
 
-tech = cli.tech or ""
+local tech = cli.tech or ""
 if tech == "orangecrab" then
     local oc = require "build/orangecrab"
     rules = r(rules.Rules, oc.build(
@@ -39,5 +41,10 @@ if tech == "orangecrab" then
         tobool(cli.quiet or true)
     ))
 end
+
+local sw = require "build/sw"
+local swrules = sw.build(prog)
+
+rules = r(rules.Rules, swrules.Rules)
 
 return rules
