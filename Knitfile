@@ -34,12 +34,18 @@ if tech == "orangecrab" then
     local oc = require "build/orangecrab"
     rules = r(rules.Rules, oc.build(
         "tech/orangecrab/orangecrab.lpf",
-        knit.glob("tech/orangecrab/*.v"),
+        {"tech/orangecrab/top.v", "tech/orangecrab/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top/$top.sv",
         tobool(cli.quiet or true)
     ))
+    local clkin = 48
+    local clkout = 32
+    rules = r(rules.Rules, {
+    $ tech/orangecrab/pll.v:
+        ecppll --clkin $clkin -o $clkout -f $output
+    })
 end
 
 local sw = require "build/sw"
