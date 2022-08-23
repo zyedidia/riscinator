@@ -19,12 +19,14 @@ Clone the repository:
 git clone https://github.com/zyedidia/riscinator
 ```
 
-The makefile has the following targets:
+Riscinator uses [knit](https://github.com/zyedidia/knit) to build.
 
-* `make`/`make build`: generate FIRRTL and Verilog in `generated/`.
-* `make synth`: use Yosys to synthesize for the OrangeCrab 25F.
-* `make prog`: send the bitstream to the FPGA.
-* `make test`: run the test suite.
+The Knitfile has the following targets:
+
+* `knit`/`knit build`: generate FIRRTL and Verilog in `generated/`.
+* `knit synth`: use Yosys to synthesize for the OrangeCrab 25F.
+* `knit prog`: send the bitstream to the FPGA.
+* `knit test`: run the test suite.
 
 The tests and example programs require you to have a RISC-V GNU toolchain
 installed.
@@ -34,15 +36,11 @@ install it from the prebuilt releases at
 [llvm/circt](https://github.com/llvm/circt). Eget can automatically install it
 for you with `eget llvm/circt -f firtool`.
 
-By default the makefile generates the design to run an empty program. If you
-have the appropriate tools installed, create a `conf.mk` file containing:
-
-```
-SW = blink
-TECH = orangecrab
-```
-
-and run `make synth` to generate a blink program for the OrangeCrab FPGA.
+By default the Knitfile sets up a design that runs the `blink` program. You can
+configure it to use a different program from the `sw` directory with `knit
+build prog=...`. If you have the appropriate tools installed, you can also
+synthesize for the OrangeCrab ECP5 25F FPGA by running `knit synth
+tech=orangecrab`
 
 # Future
 
