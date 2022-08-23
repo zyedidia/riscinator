@@ -1,14 +1,14 @@
 local chisel = {}
 
-function chisel.build(src, sbt, main, top, gen, args)
+function chisel.build(src, sbt, pkg, top, gen, args)
     local firflags := --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
     return {
-    $ $gen/$top.fir: $src
+    $ $gen/%.fir: $src
         mkdir -p $gen
-        $sbt runMain $main $args
+        $sbt runMain $pkg.$match $args
 
-    $ $gen/$top/$top.sv: $gen/$top.fir
-        firtool --split-verilog -o $gen/$top $input --annotation-file=$gen/$top.anno.json $firflags
+    $ $gen/(.*)/(.*).sv:R: $gen/$$1.fir
+        firtool --split-verilog -o $gen/$match1 $input --annotation-file=$gen/$match1.anno.json $firflags
     }
 end
 

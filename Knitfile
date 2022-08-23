@@ -8,16 +8,24 @@ src = knit.rglob("src/main/scala/", "*.scala")
 gen := generated
 mem = cli.mem or "sw/dummy/dummy.mem"
 
-local build = chisel.build(src, sbt, f"rtor.$top", top, gen, mem)
+local build = chisel.build(src, sbt, "rtor", top, gen, mem)
 local format = chisel.format(sbt, gen)
+
+local verilator = require "build/verilator"
+
+local verilogCore = f"$gen/Core/*.sv"
+local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core/Core.sv")
 
 local rules = r(
     {
         $ build:V: $gen/$top/$top.sv
     },
     build,
-    format
+    format,
+    test
 )
+
+local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
 
 tech = cli.tech or ""
 if tech == "orangecrab" then
