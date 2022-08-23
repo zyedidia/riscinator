@@ -40,3 +40,5 @@ todo.txt
 notes.txt
 
 .verilator
+
+tech/orangecrab/pll.v
