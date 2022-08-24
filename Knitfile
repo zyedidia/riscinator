@@ -2,15 +2,13 @@ local knit = import("knit")
 
 local chisel = require "build/chisel"
 
-top = cli.top or "Soc"
-sbt := sbt --client
-src = knit.rglob("src/main/scala/", "*.scala")
-gen := generated
-prog = cli.prog or "blink"
-mem = f"sw/$prog/$prog.mem"
+local top = cli.top or "Soc"
+local src = knit.rglob("src/main/scala/", "*.scala")
+local gen := generated
+local prog = cli.prog or "blink"
+local mem = f"sw/$prog/$prog.mem"
 
-local build = chisel.build(src, sbt, "rtor", top, gen, mem)
-local format = chisel.format(sbt, gen)
+local build = chisel.build(src, "rtor", top, gen, mem)
 
 local verilator = require "build/verilator"
 
@@ -23,7 +21,6 @@ local rules = r(
         $ build:V: $gen/$top/$top.sv
     },
     build,
-    format,
     test
 )
 
