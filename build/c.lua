@@ -15,16 +15,12 @@ function c.rules(tools, flags)
     return {
     $ %.o: %.c
         $(tools.cc) $(flags.cc) -c $input -o $output
-
     $ %.o: %.s
         $(tools.as) $(flags.as) -c $input -o $output
-
     $ %.bin: %.elf
         $(tools.objcopy) $input -O binary $output
-
     $ %.list: %.elf
         $(tools.objdump) -D $input > $output
-
     $ %.mem: %.bin
         hexdump -v -e '1/4 "%08x\n"' $input > $output
     }
