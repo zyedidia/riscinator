@@ -17,6 +17,10 @@ local subtests = include("tests/Knitfile")
 local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
 local sim = verilator.sim("tests/sim.cc", verilogCore, "Core", f"$gen/Core tests/rtor_mem.h")
 
+local arc = require "build/arc"
+local arcd = tobool(cli.arcd) or false
+local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd)
+
 local rules = r(
     {
         $ build:V: $gen/$top $gen/rtor.mem
@@ -27,7 +31,8 @@ local rules = r(
     },
     build,
     test,
-    sim
+    sim,
+    arctest
 )
 
 local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
