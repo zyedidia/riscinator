@@ -41,7 +41,9 @@ static unsigned addr2idx(uint32_t addr, size_t mem_base) {
 
 static bool failed = false;
 
-static void simulate(VCore* core, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
+static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
+    printf("%s...", name);
+
     core->reset = 1;
     clock(core);
     core->reset = 0;
@@ -98,6 +100,10 @@ static void simulate(VCore* core, uint32_t* mem, size_t len, size_t mem_base, ch
             failed = true;
         }
     }
+
+    if (!failed) {
+        printf("PASS\n");
+    }
 }
 
 #define MEMSIZE 4096
@@ -126,7 +132,7 @@ static void itype() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
+    simulate("itype", core, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
 }
 
 static void jmps() {
@@ -160,7 +166,7 @@ static void jmps() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
+    simulate("jmps", core, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
 }
 
 int main(int argc, char **argv) {
@@ -170,6 +176,5 @@ int main(int argc, char **argv) {
     jmps();
 
     if (failed) return 1;
-    printf("ALL TESTS PASSED\n");
     return 0;
 }
