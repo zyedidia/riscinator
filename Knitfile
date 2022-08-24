@@ -21,6 +21,10 @@ local arc = require "build/arc"
 local arcd = tobool(cli.arcd) or false
 local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd)
 
+local arc = require "build/arc"
+local arcd = tobool(cli.arcd) or false
+local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd)
+
 local rules = r(
     {
         $ build:V: $gen/$top $gen/rtor.mem
