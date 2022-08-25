@@ -98,8 +98,5 @@ class Soc(memFile: String) extends Module {
 }
 
 object Soc extends App {
-  if (args.length == 0) {
-    throw new Exception("no memory file provided")
-  }
-  (new chisel3.stage.ChiselStage).emitFirrtl(new Soc(args(0)), Array("--target-dir", "generated"))
+  (new chisel3.stage.ChiselStage).emitFirrtl(new Soc("generated/rtor.mem"), Array("--target-dir", "generated"))
 }

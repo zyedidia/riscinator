@@ -1,6 +1,6 @@
 local chisel = {}
 
-function chisel.build(src, pkg, top, gen, mem)
+function chisel.build(src, pkg, top, gen)
     local firflags := --disable-annotation-unknown -O=release --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
     local sbt = "sbt --client"
     return {
@@ -8,9 +8,9 @@ function chisel.build(src, pkg, top, gen, mem)
         mkdir -p $gen
         $sbt runMain $pkg.$match
 
-    $ $gen/Soc.fir: $src $mem serve
+    $ $gen/Soc.fir: $src serve
         mkdir -p $gen
-        $sbt runMain $pkg.Soc $mem
+        $sbt runMain $pkg.Soc
 
     $ $gen/(.*)/(.*).sv:R: $gen/$$1.fir
         firtool --split-verilog -o $gen/$match1 $input --annotation-file=$gen/$match1.anno.json $firflags
