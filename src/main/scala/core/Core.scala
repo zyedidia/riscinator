@@ -74,13 +74,7 @@ class Core(conf: Config) extends Module {
   control.io.inst := fe.inst
   execute.io.data.inst := fe.inst
 
-  execute.io.ctrl.imm_sel := control.io.sig.imm_sel
-  execute.io.ctrl.ld_type := control.io.sig.ld_type
-  execute.io.ctrl.st_type := control.io.sig.st_type
-  execute.io.ctrl.alu_op := control.io.sig.alu_op
-  execute.io.ctrl.a_sel := control.io.sig.a_sel
-  execute.io.ctrl.b_sel := control.io.sig.b_sel
-  execute.io.ctrl.br_type := control.io.sig.br_type
+  execute.io.ctrl := control.io.sig
 
   execute.io.data.pc := fe.pc
 
