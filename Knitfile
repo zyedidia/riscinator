@@ -2,15 +2,13 @@ local knit = import("knit")
 
 local chisel = require "build/chisel"
 
-top = cli.top or "Soc"
-sbt := sbt --client
-src = knit.rglob("src/main/scala/", "*.scala")
-gen := generated
-prog = cli.prog or "blink"
-mem = f"sw/$prog/$prog.mem"
+local top = cli.top or "Soc"
+local src = knit.rglob("src/main/scala/", "*.scala")
+local gen := generated
+local prog = cli.prog or "blink"
+local mem = f"sw/$prog/$prog.mem"
 
-local build = chisel.build(src, sbt, "rtor", top, gen, mem)
-local format = chisel.format(sbt, gen)
+local build = chisel.build(src, "rtor", top, gen, mem)
 
 local verilator = require "build/verilator"
 
@@ -20,10 +18,11 @@ local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core/Cor
 
 local rules = r(
     {
-        $ build:V: $gen/$top/$top.sv
+        $ build:V: $gen/$top/$top.sv $gen/rtor.mem
+        $ $gen/rtor.mem: sw/$prog/$prog.mem
+            cp $input $output
     },
     build,
-    format,
     test
 )
 
@@ -37,7 +36,7 @@ if tech == "orangecrab" then
         {"tech/orangecrab/top.v", "tech/orangecrab/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
-        f"$gen/$top/$top.sv",
+        f"$gen/$top/$top.sv $gen/rtor.mem",
         tobool(cli.quiet or true)
     ))
     local clkin = 48
