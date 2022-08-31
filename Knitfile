@@ -8,7 +8,7 @@ local gen := generated
 local prog = cli.prog or "blink"
 local mem = f"sw/$prog/$prog.mem"
 
-local build = chisel.build(src, "rtor", top, gen, mem)
+local build = chisel.build(src, "rtor", top, gen)
 
 local verilator = require "build/verilator"
 
