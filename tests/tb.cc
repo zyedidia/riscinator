@@ -4,6 +4,7 @@
 #include "VCore.h"
 #include "VCore___024root.h"
 #include "verilated.h"
+#include "verilated_vcd_c.h"
 
 #include "itype_mem.h"
 #include "jmps_mem.h"
@@ -44,6 +45,11 @@ static bool failed = false;
 static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
     printf("%s...", name);
 
+    VerilatedVcdC* tfp = new VerilatedVcdC;
+    core->trace(tfp, 99);
+    tfp->open(name);
+    auto time = 0;
+
     core->reset = 1;
     clock(core);
     core->reset = 0;
@@ -82,7 +88,9 @@ static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, s
         }
 
         clock(core);
+        tfp->dump(time++);
     }
+    tfp->close();
 
     for (auto v : check->regs) {
         auto got = core->rootp->Core__DOT__rf__DOT__regs_ext__DOT__Memory[v.idx];
@@ -137,6 +145,7 @@ static void itype() {
 
 static void jmps() {
     VCore* core = new VCore;
+
     memset(mem, 0, sizeof(mem));
     memcpy(mem, jmps_bin, jmps_bin_len);
     check_t* check = (check_t*) calloc(sizeof(check_t), 1);
@@ -171,6 +180,7 @@ static void jmps() {
 
 int main(int argc, char **argv) {
     Verilated::commandArgs(argc, argv);
+    Verilated::traceEverOn(true);
 
     itype();
     jmps();

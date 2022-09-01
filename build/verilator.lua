@@ -4,7 +4,7 @@ function verilator.tb(tb, verilog, top, dep)
     local vdir = ".verilator"
     return {
     $ $vdir/tb: $tb $dep
-        verilator --public -sv -cc -Mdir $vdir $verilog --top $top --exe --build $tb -o tb
+        verilator --public -sv -cc -Mdir $vdir $verilog --top $top --exe --build --trace $tb -o tb
     $ test:VB: $vdir/tb
         ./$input
     }
