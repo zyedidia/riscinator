@@ -14,11 +14,11 @@ local verilator = require "build/verilator"
 
 local verilogCore = f"$gen/Core/*.sv"
 local subtests = include("tests/Knitfile")
-local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core/Core.sv [$subtests][tests]hdr")
+local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
 
 local rules = r(
     {
-        $ build:V: $gen/$top/$top.sv $gen/rtor.mem
+        $ build:V: $gen/$top $gen/rtor.mem
         $ $gen/rtor.mem: sw/$prog/$prog.mem
             cp $input $output
     },
@@ -36,7 +36,7 @@ if tech == "orangecrab" then
         {"tech/orangecrab/top.v", "tech/orangecrab/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
-        f"$gen/$top/$top.sv $gen/rtor.mem",
+        f"$gen/$top $gen/rtor.mem",
         tobool(cli.quiet or true)
     ))
     local clkin = 48
