@@ -14,16 +14,20 @@ local verilator = require "build/verilator"
 
 local verilogCore = f"$gen/Core/*.sv"
 local subtests = include("tests/Knitfile")
-local test = verilator.build("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
+local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
+local sim = verilator.sim("tests/sim.cc", verilogCore, "Core", f"$gen/Core tests/rtor_mem.h")
 
 local rules = r(
     {
         $ build:V: $gen/$top $gen/rtor.mem
         $ $gen/rtor.mem: sw/$prog/$prog.mem
             cp $input $output
+        $ tests/rtor.bin: sw/$prog/$prog.bin
+            cp $input $output
     },
     build,
-    test
+    test,
+    sim
 )
 
 local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
