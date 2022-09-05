@@ -67,17 +67,17 @@ static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, s
         core->io_dmem_gnt = core->io_dmem_req;
 
         if (core->io_imem_req) {
-            assert(core->io_imem_addr >= mem_base && core->io_imem_addr < mem_base + len);
+            assert(addr2idx(core->io_imem_addr, mem_base) < len);
             next_imem_rdata = mem[addr2idx(core->io_imem_addr, mem_base)];
         }
 
         if (core->io_dmem_req && core->io_dmem_we) {
             uint32_t write = core->io_dmem_wdata;
             uint32_t mask = be2mask(core->io_dmem_be);
-            assert(core->io_dmem_addr >= mem_base && core->io_dmem_addr < mem_base + len);
+            assert(addr2idx(core->io_dmem_addr, mem_base) < len);
             mem[addr2idx(core->io_dmem_addr, mem_base)] = write & mask;
         } else if (core->io_dmem_req) {
-            assert(core->io_dmem_addr >= mem_base && core->io_dmem_addr < mem_base + len);
+            assert(addr2idx(core->io_dmem_addr, mem_base) < len);
             next_dmem_rdata = mem[addr2idx(core->io_dmem_addr, mem_base)];
         }
 
