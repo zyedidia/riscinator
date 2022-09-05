@@ -70,28 +70,18 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
         core.io_dmem_gnt = core.io_dmem_req;
 
         if (core.io_imem_req) {
-            printf("imem read: %x\n", core.io_imem_addr);
-            if (core.io_imem_addr >= mem_base && core.io_imem_addr < mem_base + len) {
-                next_imem_rdata = mem[addr2idx(core.io_imem_addr, mem_base)];
-            } else {
-                next_imem_rdata = 0;
-            }
+            assert(addr2idx(core.io_imem_addr, mem_base) < len);
+            next_imem_rdata = mem[addr2idx(core.io_imem_addr, mem_base)];
         }
 
         if (core.io_dmem_req && core.io_dmem_we) {
             uint32_t write = core.io_dmem_wdata;
             uint32_t mask = be2mask(core.io_dmem_be);
-            printf("dmem write: %x\n", core.io_dmem_addr);
-            if (core.io_dmem_addr >= mem_base && core.io_dmem_addr < mem_base + len) {
-                mem[addr2idx(core.io_dmem_addr, mem_base)] = write & mask;
-            }
+            assert(addr2idx(core.io_dmem_addr, mem_base) < len);
+            mem[addr2idx(core.io_dmem_addr, mem_base)] = write & mask;
         } else if (core.io_dmem_req) {
-            printf("dmem read: %x\n", core.io_dmem_addr);
-            if (core.io_dmem_addr >= mem_base && core.io_dmem_addr < mem_base + len) {
-                next_dmem_rdata = mem[addr2idx(core.io_dmem_addr, mem_base)];
-            } else {
-                next_dmem_rdata = 0;
-            }
+            assert(addr2idx(core.io_dmem_addr, mem_base) < len);
+            next_dmem_rdata = mem[addr2idx(core.io_dmem_addr, mem_base)];
         }
 
         Core_clock(statePtr);
