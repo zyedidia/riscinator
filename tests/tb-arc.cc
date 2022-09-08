@@ -7,6 +7,8 @@
 #include <cstring>
 #include <vector>
 
+#include "rvsym.h"
+
 #include "itype_mem.h"
 #include "jmps_mem.h"
 
@@ -41,13 +43,11 @@ static unsigned addr2idx(uint32_t addr, size_t mem_base) {
 
 static bool failed = false;
 
-static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> vcd, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
+static void simulate(CoreView core, void* statePtr, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
     core.reset = 1;
     Core_passthrough(statePtr);
-    vcd.writeTimestep(1);
     Core_clock(statePtr);
     Core_passthrough(statePtr);
-    vcd.writeTimestep(1);
     core.reset = 0;
 
     uint32_t next_imem_rdata = 0;
@@ -58,7 +58,6 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
     unsigned ncyc = 50;
     for (unsigned i = 0; i < ncyc; i++) {
         Core_passthrough(statePtr);
-        vcd.writeTimestep(1);
 
         core.io_imem_rvalid = next_imem_rvalid;
         core.io_imem_rdata = next_imem_rdata;
@@ -79,6 +78,7 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
             uint32_t mask = be2mask(core.io_dmem_be);
             assert(addr2idx(core.io_dmem_addr, mem_base) < len);
             mem[addr2idx(core.io_dmem_addr, mem_base)] = write & mask;
+            printf("%x: dmem write: %d\n", core.io_dmem_addr, write & mask);
         } else if (core.io_dmem_req) {
             assert(addr2idx(core.io_dmem_addr, mem_base) < len);
             next_dmem_rdata = mem[addr2idx(core.io_dmem_addr, mem_base)];
@@ -99,7 +99,7 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
         auto got = mem[addr2idx(v.idx, mem_base)];
         auto expected = v.value;
         if (got != expected) {
-            printf("FAIL: regs[%d]: %d != %d\n", v.idx, got, expected);
+            printf("FAIL: mem[%x]: %d != %d\n", v.idx, got, expected);
             failed = true;
         }
     }
@@ -113,11 +113,6 @@ static void itype() {
     std::vector<uint8_t> state(CoreLayout::numStateBytes, 0);
     CoreView core(&state[0]);
     void* statePtr = static_cast<void*>(&state[0]);
-
-    std::ofstream os("itype.vcd");
-    ValueChangeDump<CoreLayout> vcd(os, &state[0]);
-    vcd.writeHeader();
-    vcd.writeDumpvars();
 
     memset(mem, 0, sizeof(mem));
     memcpy(mem, itype_bin, itype_bin_len);
@@ -139,18 +134,13 @@ static void itype() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, statePtr, vcd, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
+    simulate(core, statePtr, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
 }
 
 static void jmps() {
     std::vector<uint8_t> state(CoreLayout::numStateBytes, 0);
     CoreView core(&state[0]);
     void* statePtr = static_cast<void*>(&state[0]);
-
-    std::ofstream os("jmps.vcd");
-    ValueChangeDump<CoreLayout> vcd(os, &state[0]);
-    vcd.writeHeader();
-    vcd.writeDumpvars();
 
     memset(mem, 0, sizeof(mem));
     memcpy(mem, jmps_bin, jmps_bin_len);
@@ -181,7 +171,7 @@ static void jmps() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, statePtr, vcd, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
+    simulate(core, statePtr, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
 }
 
 int main(int argc, char **argv) {
