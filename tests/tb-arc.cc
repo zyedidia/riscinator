@@ -10,11 +10,6 @@
 #include "itype_mem.h"
 #include "jmps_mem.h"
 
-extern "C" {
-unsigned Core_clock(void* state);
-unsigned Core_passthrough(void* state);
-}
-
 typedef struct {
     uint32_t idx;
     uint32_t value;
@@ -41,12 +36,12 @@ static unsigned addr2idx(uint32_t addr, size_t mem_base) {
 
 static bool failed = false;
 
-static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> vcd, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
+static void simulate(Core &core, ValueChangeDump<CoreLayout> vcd, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
     core.reset = 1;
-    Core_passthrough(statePtr);
+    core.passthrough();
     vcd.writeTimestep(1);
-    Core_clock(statePtr);
-    Core_passthrough(statePtr);
+    core.clock();
+    core.passthrough();
     vcd.writeTimestep(1);
     core.reset = 0;
 
@@ -57,7 +52,7 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
 
     unsigned ncyc = 50;
     for (unsigned i = 0; i < ncyc; i++) {
-        Core_passthrough(statePtr);
+        core.passthrough();
         vcd.writeTimestep(1);
 
         core.io_imem_rvalid = next_imem_rvalid;
@@ -84,7 +79,7 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
             next_dmem_rdata = mem[addr2idx(core.io_dmem_addr, mem_base)];
         }
 
-        Core_clock(statePtr);
+        core.clock();
     }
 
     for (auto v : check->regs) {
@@ -99,7 +94,7 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
         auto got = mem[addr2idx(v.idx, mem_base)];
         auto expected = v.value;
         if (got != expected) {
-            printf("FAIL: regs[%d]: %d != %d\n", v.idx, got, expected);
+            printf("FAIL: mem[%x]: %d != %d\n", v.idx, got, expected);
             failed = true;
         }
     }
@@ -110,12 +105,9 @@ static void simulate(CoreView core, void* statePtr, ValueChangeDump<CoreLayout> 
 static uint32_t mem[MEMSIZE];
 
 static void itype() {
-    std::vector<uint8_t> state(CoreLayout::numStateBytes, 0);
-    CoreView core(&state[0]);
-    void* statePtr = static_cast<void*>(&state[0]);
-
+    Core core;
     std::ofstream os("itype.vcd");
-    ValueChangeDump<CoreLayout> vcd(os, &state[0]);
+    auto vcd = core.vcd(os);
     vcd.writeHeader();
     vcd.writeDumpvars();
 
@@ -139,16 +131,13 @@ static void itype() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, statePtr, vcd, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
+    simulate(core, vcd, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
 }
 
 static void jmps() {
-    std::vector<uint8_t> state(CoreLayout::numStateBytes, 0);
-    CoreView core(&state[0]);
-    void* statePtr = static_cast<void*>(&state[0]);
-
+    Core core;
     std::ofstream os("jmps.vcd");
-    ValueChangeDump<CoreLayout> vcd(os, &state[0]);
+    auto vcd = core.vcd(os);
     vcd.writeHeader();
     vcd.writeDumpvars();
 
@@ -181,7 +170,7 @@ static void jmps() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate(core, statePtr, vcd, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
+    simulate(core, vcd, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
 }
 
 int main(int argc, char **argv) {
