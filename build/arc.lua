@@ -1,7 +1,9 @@
 local arc = {}
 
-function arc.build(tb, top, gen, dep, debug)
-    local d = debug and "-d" or ""
+function arc.build(tb, top, gen, dep, debug, tap)
+    print(debug)
+    local d = debug and "-s" or ""
+    local t = tap and "-d 1" or ""
     local bin = "tb-arc"
 
     local cxx = "g++"
@@ -10,7 +12,7 @@ function arc.build(tb, top, gen, dep, debug)
 
     return {
     $ $gen/$top.o $gen/$top.h: $gen/$top.fir
-        arc $d $input
+        arc $d $t $input
     $ $bin.o: $tb $gen/$top.h $dep
         $cxx $cxxflags -c $(inputs[1]) -o $output
     $ $bin: $bin.o $gen/$top.o

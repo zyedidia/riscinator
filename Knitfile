@@ -21,11 +21,8 @@ local sim = verilator.sim("tests/sim.cc", verilogCore, "Core", f"$gen/Core tests
 
 local arc = require "build/arc"
 local arcd = tobool(cli.arcd) or false
-local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd)
-
-local arc = require "build/arc"
-local arcd = tobool(cli.arcd) or false
-local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd)
+local tap = tobool(cli.tap) or false
+local arctest = arc.build("tests/tb-arc.cc", "Core", gen, f"[$subtests][tests]hdr", arcd, tap)
 
 local rules = r(
     {
