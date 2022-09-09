@@ -68,7 +68,8 @@ class Execute(xlen: Int, rlen: Int) extends Module {
   alu.io.b := Mux(io.ctrl.b_sel === BSel.rs2, io.rf.rs2r, io.data.imm)
 
   val daddr = alu.io.out & ~("b11".U(xlen.W))
-  val woffset = (alu.io.out(1) << 4.U) | (alu.io.out(0) << 3.U)
+  val woffset = Wire(UInt(5.W))
+  woffset := (alu.io.out(1) << 4.U) | (alu.io.out(0) << 3.U)
 
   val dmem_rd_req = io.ctrl.ld_type =/= LdType.none
   val dmem_wr_req = io.ctrl.st_type =/= StType.none
