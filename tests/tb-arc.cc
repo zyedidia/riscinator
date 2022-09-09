@@ -108,8 +108,6 @@ static void itype() {
     Core core;
     std::ofstream os("itype.vcd");
     auto vcd = core.vcd(os);
-    vcd.writeHeader();
-    vcd.writeDumpvars();
 
     memset(mem, 0, sizeof(mem));
     memcpy(mem, itype_bin, itype_bin_len);
@@ -138,8 +136,6 @@ static void jmps() {
     Core core;
     std::ofstream os("jmps.vcd");
     auto vcd = core.vcd(os);
-    vcd.writeHeader();
-    vcd.writeDumpvars();
 
     memset(mem, 0, sizeof(mem));
     memcpy(mem, jmps_bin, jmps_bin_len);
