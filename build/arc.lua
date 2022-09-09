@@ -1,7 +1,6 @@
 local arc = {}
 
 function arc.build(tb, top, gen, dep, debug, tap)
-    print(debug)
     local d = debug and "-s" or ""
     local t = tap and "-d 1" or ""
     local bin = "tb-arc"
