@@ -8,9 +8,8 @@ arbiter, 16K of SRAM memory, and timer, UART, and GPIO modules. There is a
 bare-metal C library with drivers for the devices on the system. An example
 program in `sw/blink` blinks pin 0 using the timer.
 
-There are synthesis scripts for instantiating the system on an OrangeCrab 25F
-FPGA.
-
+There are synthesis scripts for instantiating the system on an OrangeCrab 25F,
+or ULX3S 85F.
 # Usage
 
 Clone the repository:
@@ -40,7 +39,7 @@ By default the Knitfile sets up a design that runs the `blink` program. You can
 configure it to use a different program from the `sw` directory with `knit
 build prog=...`. If you have the appropriate tools installed, you can also
 synthesize for the OrangeCrab ECP5 25F FPGA by running `knit synth
-tech=orangecrab`
+tech=orangecrab`. Use `tech=ulx3s` to sythesize for the ULX3S 85F FPGA.
 
 # Future
 
@@ -57,6 +56,6 @@ Some enhancements that I may or may not get to:
 
 * M-extension and C-extension support.
 * Optionally, more pipeline stages.
-* More FPGA support (ULX3S, Upduino, Nexys A7, and more).
+* More FPGA support (Upduino, Nexys A7, and more).
 
 See also [riscv-mini](https://github.com/ucb-bar/riscv-mini).

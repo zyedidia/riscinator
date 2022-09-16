@@ -1,6 +1,5 @@
 #pragma once
 
-#include "sys.h"
 #include "mem.h"
 
 typedef struct {

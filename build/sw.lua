@@ -1,13 +1,13 @@
 local sw = {}
 
-function sw.build(prog)
+function sw.build(prog, clkmhz)
     local knit = import("knit")
     local csrc = knit.join(knit.rglob("sw/librtor", "*.c"), knit.rglob(f"sw/$prog", "*.c"))
     local ssrc = knit.join(knit.rglob("sw/librtor", "*.s"), knit.rglob(f"sw/$prog", "*.s"))
     local obj = knit.join(knit.extrepl(csrc, ".c", ".o"), knit.extrepl(ssrc, ".s", ".o"))
 
-    local rvcfg = riscv.config("sw/librtor/memmap.ld")
-    rvcfg.flags.cc = rvcfg.flags.cc .. " -Isw/librtor"
+    local rvcfg = riscv.config("sw/librtor/memmap.ld", clkmhz)
+    rvcfg.flags.cc = rvcfg.flags.cc .. " -Isw/librtor" .. f" -DCLK_FREQ_MHZ=$clkmhz"
     local rvtools = c.toolchain(rvcfg.prefix)
     local crules = c.rules(rvtools, rvcfg.flags)
     local libgcc = c.libgcc(rvtools.cc, rvcfg.flags.cc)

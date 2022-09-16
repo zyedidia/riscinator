@@ -32,6 +32,8 @@ local rules = r(
 
 local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
 
+local clkmhz = 1
+
 local tech = cli.tech or ""
 if tech == "orangecrab" then
     local oc = require "build/orangecrab"
@@ -49,10 +51,22 @@ if tech == "orangecrab" then
     $ tech/orangecrab/pll.v:
         ecppll --clkin $clkin -o $clkout -f $output
     })
+    clkmhz = clkout
+elseif tech == "ulx3s" then
+    local ulx3s = require "build/ulx3s"
+    rules = r(rules.Rules, ulx3s.build(
+        "tech/ulx3s/ulx3s_v20.lpf",
+        {"tech/ulx3s/top.v"},
+        top,
+        f"$gen/$top/*.sv $gen/$top/generated/*.sv",
+        f"$gen/$top $gen/rtor.mem",
+        tobool(cli.quiet or true)
+    ))
+    clkmhz = 25
 end
 
 local sw = require "build/sw"
-local swrules = sw.build(prog)
+local swrules = sw.build(prog, clkmhz)
 
 rules = r(rules.Rules, swrules.Rules)
 
