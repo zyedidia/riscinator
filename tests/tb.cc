@@ -65,6 +65,7 @@ static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, s
         next_imem_rvalid = core->io_imem_req;
         next_dmem_rvalid = core->io_dmem_req;
         core->io_dmem_gnt = core->io_dmem_req;
+        core->eval();
 
         if (core->io_imem_req) {
             assert(addr2idx(core->io_imem_addr, mem_base) < len);
