@@ -8,11 +8,9 @@ function chisel.build(src, pkg, top, gen)
         firtool --split-verilog -o $gen/$match $input --annotation-file=$gen/$match.anno.json $firflags
 
     $ $gen/%.fir: $src serve gen
-        mkdir -p $gen
         $sbt runMain $pkg.$match
 
     $ $gen/Soc.fir: $src serve gen
-        mkdir -p $gen
         $sbt runMain $pkg.Soc
 
     $ $gen/%.sv: $gen/%.fir
