@@ -2,10 +2,12 @@ local knit = import("knit")
 
 local chisel = require "build/chisel"
 
-local top = cli.top or "Soc"
+local conf = include("conf.lua")
+
+local top = conf.top
 local src = knit.rglob("src/main/scala/", "*.scala")
 local gen := generated
-local prog = cli.prog or "blink"
+local prog = conf.prog
 local mem = f"sw/$prog/$prog.mem"
 
 local build = chisel.build(src, "rtor", top, gen)
@@ -34,7 +36,7 @@ local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
 
 local clkmhz = 1
 
-local tech = cli.tech or ""
+local tech = conf.tech or ""
 if tech == "orangecrab" then
     local oc = require "build/orangecrab"
     rules = r(rules.Rules, oc.build(
@@ -43,7 +45,7 @@ if tech == "orangecrab" then
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top $gen/rtor.mem",
-        tobool(cli.quiet or true)
+        tobool(conf.quiet or true)
     ))
     local clkin = 48
     local clkout = 32
@@ -60,7 +62,7 @@ elseif tech == "ulx3s" then
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top $gen/rtor.mem",
-        tobool(cli.quiet or true)
+        tobool(conf.quiet or true)
     ))
     clkmhz = 25
 end
