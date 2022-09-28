@@ -10,7 +10,25 @@ program in `sw/blink` blinks pin 0 using the timer.
 
 There are synthesis scripts for instantiating the system on an OrangeCrab 25F,
 or ULX3S 85F.
+
 # Usage
+
+## Dependencies
+
+Install the dependencies:
+
+* [knit](https://github.com/zyedidia/knit): `eget zyedidia/knit`.
+* [chisel](https://github.com/chipsalliance/chisel3).
+* [espresso](https://github.com/chipsalliance/espresso): `eget chipsalliance/espresso`.
+* [firtool](https://github.com/llvm/circt): `eget llvm/circt -f firtool --pre-release`.
+* [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain): download from [riscv-gnu-toolchain-prebuilt](https://github.com/zyedidia/riscv-gnu-toolchain-prebuilt).
+
+Optional dependencies:
+
+* [verilator](https://github.com/verilator/verilator): for simulation.
+* [oss-cad-suite](https://github.com/YosysHQ/oss-cad-suite-build): for FPGA synthesis.
+
+## Building
 
 Clone the repository:
 
