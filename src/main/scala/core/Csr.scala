@@ -116,8 +116,13 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
   )
 
   // TODO: additional kinds of faults
-  // counters
   // user mode reading from legal CSRs (currently all CSRs are inaccessible to user mode)
+
+  // counters
+  regs(Csr.time) := regs(Csr.time) + 1.U
+  when(regs(Csr.time).andR) { regs(Csr.timeh) := regs(Csr.timeh) + 1.U }
+  regs(Csr.cycle) := regs(Csr.cycle) + 1.U
+  when(regs(Csr.cycle).andR) { regs(Csr.cycleh) := regs(Csr.cycleh) + 1.U }
 
   def isT(t: EnumType) = io.ctrl.csr_type === t
 
