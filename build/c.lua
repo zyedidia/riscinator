@@ -23,6 +23,8 @@ function c.rules(tools, flags)
         $(tools.objdump) -D $input > $output
     $ %.mem: %.bin
         hexdump -v -e '1/4 "%08x\n"' $input > $output
+    $ %_mem.h: %.bin
+        xxd --include $input > $output
     }
 end
 

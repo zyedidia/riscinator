@@ -18,6 +18,7 @@ test_run_dir
 *_mem.h
 .knit
 *.pdf
+*.log
 
 # Scala IDEs
 .project

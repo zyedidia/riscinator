@@ -133,7 +133,7 @@ static void itype() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate("itype", core, (uint32_t*) itype_bin, MEMSIZE, MEMBASE, check);
+    simulate("itype", core, (uint32_t*) mem, MEMSIZE, MEMBASE, check);
 }
 
 static void jmps() {
@@ -167,7 +167,7 @@ static void jmps() {
         {0x100004, 63},
         {0x100008, 67},
     };
-    simulate("jmps", core, (uint32_t*) jmps_bin, MEMSIZE, MEMBASE, check);
+    simulate("jmps", core, (uint32_t*) mem, MEMSIZE, MEMBASE, check);
 }
 
 int main(int argc, char **argv) {
