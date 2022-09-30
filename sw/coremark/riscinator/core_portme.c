@@ -157,5 +157,4 @@ void
 portable_fini(core_portable *p)
 {
     p->portable_id = 0;
-    for(;;);
 }
