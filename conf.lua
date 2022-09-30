@@ -1,7 +1,7 @@
 return {
     prog = cli.prog or "blink",
-    quiet = cli.quiet or true,
+    quiet = tobool(cli.quiet) or true,
     top = cli.top or "Soc",
     tech = cli.tech or "ulx3s",
-    cmdebug = cli.cmdebug or false,
+    cmdebug = tobool(cli.cmdebug) or false,
 }
