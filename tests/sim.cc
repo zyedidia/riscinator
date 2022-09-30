@@ -69,9 +69,7 @@ static void simulate(VCore* core, uint32_t* mem, size_t len, size_t mem_base, un
         core->io_dmem_gnt = core->io_dmem_req;
         core->eval();
 
-        // printf("ra: %x\n", core->rootp->Core__DOT__rf__DOT__regs_ext__DOT__Memory[1]);
         if (core->io_imem_req) {
-            // printf("imem: %x\n", core->io_imem_addr);
             assert(addr2idx(core->io_imem_addr, mem_base) < len);
             next_imem_rdata = mem[addr2idx(core->io_imem_addr, mem_base)];
         }
@@ -84,12 +82,10 @@ static void simulate(VCore* core, uint32_t* mem, size_t len, size_t mem_base, un
             } else if (addr2idx(core->io_dmem_addr, mem_base) < len) {
                 uint32_t val = mem[addr2idx(core->io_dmem_addr, mem_base)];
                 mem[addr2idx(core->io_dmem_addr, mem_base)] = (val & ~mask) | (write & mask);
-                // printf("wr %x = %x\n", core->io_dmem_addr, write & mask);
             }
         } else if (core->io_dmem_req) {
             if (addr2idx(core->io_dmem_addr, mem_base) < len) {
                 next_dmem_rdata = mem[addr2idx(core->io_dmem_addr, mem_base)];
-                // printf("rd %x = %x\n", core->io_dmem_addr, next_dmem_rdata);
             } else {
                 next_dmem_rdata = 0;
             }

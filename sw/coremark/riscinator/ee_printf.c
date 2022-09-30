@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <coremark.h>
 #include <stdarg.h>
+#include "uart.h"
 
 #define ZEROPAD   (1 << 0) /* Pad with zero */
 #define SIGN      (1 << 1) /* Unsigned/signed long */
@@ -459,10 +460,10 @@ flt(char *str, double num, int size, int precision, char fmt, int flags)
 
 static volatile unsigned *uart = (unsigned *) 0x30000;
 
-void __attribute__((noinline))
+void
 uart_send_char(char c)
 {
-    *uart = c;
+    uart_tx(c);
 }
 
 

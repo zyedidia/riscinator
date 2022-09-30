@@ -68,7 +68,7 @@ elseif tech == "ulx3s" then
 end
 
 local sw = require "build/sw"
-local swrules = sw.build(prog, clkmhz)
+local swrules = sw.build(prog, clkmhz, conf.cmdebug)
 
 rules = r(rules.Rules, swrules.Rules)
 

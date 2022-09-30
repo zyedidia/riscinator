@@ -6,7 +6,7 @@ function oc.build(cons, wrap, top, verilog, dep, quiet)
     return {
     $ synth:V: $top.dfu
 
-    $ prog:V: $top.dfu
+    $ prog:VB: $top.dfu
         sudo dfu-util -D $input
 
     $ $top.dfu: $top.bit

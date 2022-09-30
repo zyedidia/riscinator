@@ -30,7 +30,9 @@ LD		= riscv64-unknown-elf-ld
 AS		= riscv64-unknown-elf-as
 # Flag : CFLAGS
 #	Use this flag to define compiler options. Note, you can add compiler options from the command line using XCFLAGS="other flags"
-PORT_CFLAGS = -mabi=ilp32 -march=rv32i -O2 -T memmap.ld -nostartfiles -ffreestanding -mcmodel=medany
+LIBRTOR_DIR = ../librtor
+LIBC_DIR = ../librtor/libc
+PORT_CFLAGS = -mabi=ilp32 -march=rv32i -O2 -T memmap.ld -nostartfiles -ffreestanding -mcmodel=medany -I$(LIBRTOR_DIR) -I$(LIBC_DIR) -DCLK_FREQ_MHZ=$(CLK_MHZ)
 FLAGS_STR = "$(PORT_CFLAGS) $(XCFLAGS) $(XLFLAGS) $(LFLAGS_END)"
 CFLAGS = $(PORT_CFLAGS) -I$(PORT_DIR) -I. -DFLAGS_STR=\"$(FLAGS_STR)\" 
 #Flag : LFLAGS_END
@@ -49,7 +51,7 @@ LFLAGS_END =
 # Flag : PORT_SRCS
 # 	Port specific source files can be added here
 #	You may also need cvt.c if the fcvt functions are not provided as intrinsics by your compiler!
-PORT_SRCS = $(PORT_DIR)/core_portme.c $(PORT_DIR)/ee_printf.c $(PORT_DIR)/start.s $(PORT_DIR)/cstart.c
+PORT_SRCS = $(PORT_DIR)/core_portme.c $(PORT_DIR)/ee_printf.c $(LIBRTOR_DIR)/start.s $(LIBRTOR_DIR)/cstart.c $(LIBRTOR_DIR)/uart.c $(LIBC_DIR)/tinyprintf.o
 vpath %.c $(PORT_DIR)
 vpath %.s $(PORT_DIR)
 

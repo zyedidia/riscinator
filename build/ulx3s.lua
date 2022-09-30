@@ -6,7 +6,7 @@ function ulx3s.build(cons, wrap, top, verilog, dep, quiet)
     return {
     $ synth:V: $top.bit
 
-    $ prog:V: $top.bit
+    $ prog:VB: $top.bit
         sudo fujprog $input
 
     $ $top.json: $wrap $dep
