@@ -59,13 +59,30 @@ build prog=...`. If you have the appropriate tools installed, you can also
 synthesize for the OrangeCrab ECP5 25F FPGA by running `knit synth
 tech=orangecrab`. Use `tech=ulx3s` to sythesize for the ULX3S 85F FPGA.
 
+# Measurements
+
+The project includes support for running CoreMark on Riscinator. It scores
+0.98CM/MHz.
+
+Here is a utilization report for the Riscinator SoC on the ULX3S, including
+RAM, UART, GPIO, and the microprocessor:
+
+```
+CELL        	TOTAL	USED	UTILIZATION
+DCCA        	56   	1   	0.02
+DP16KD      	208  	128 	0.62
+TRELLIS_COMB	83640	3941	0.05
+TRELLIS_FF  	83640	663 	0.01
+TRELLIS_IO  	365  	12  	0.03
+TRELLIS_RAMW	10455	36  	0.00
+```
+
 # Future
 
 The Riscinator is not complete yet, and I plan to add the following
 enhancements:
 
-* CSR and privileged ISA support (possibly including interrupts).
-    * In progress (currently there is limited support)
+* More complete CSR and privileged ISA support (possibly including interrupts).
 * Size and performance optimizations.
 * Better testing.
 * Cleaner Chisel implementation.
