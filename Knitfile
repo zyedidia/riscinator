@@ -58,13 +58,19 @@ elseif tech == "ulx3s" then
     local ulx3s = require "build/ulx3s"
     rules = r(rules.Rules, ulx3s.build(
         "tech/ulx3s/ulx3s_v20.lpf",
-        {"tech/ulx3s/top.v"},
+        {"tech/ulx3s/top.v", "tech/ulx3s/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top $gen/rtor.mem",
         tobool(conf.quiet or true)
     ))
-    clkmhz = 25
+    local clkin = 25
+    local clkout = 25
+    rules = rules + r{
+    $ tech/ulx3s/pll.v:
+        ecppll --clkin $clkin -o $clkout -f $output
+    }
+    clkmhz = clkout
 end
 
 local sw = require "build/sw"

@@ -7,9 +7,32 @@ module top
         output wire [6:0] led
     );
 
+    logic locked;
+    logic clk_sys;
+    logic rst_sys_n;
+
+    pll u_pll (
+        .clkin   (clk_25mhz),
+        .clkout0 (clk_sys),
+        .locked
+    );
+
+    logic [3:0] rst_cnt;
+    logic       rst;
+
+    // ensure reset release is synchronous with the clock
+    always @(posedge clk_25mhz or negedge locked)
+        if (!locked)
+            rst_cnt <= 4'h8;
+        else if (rst_cnt[3])
+            rst_cnt <= rst_cnt + 1;
+
+    assign rst = rst_cnt[3];
+    assign rst_sys_n = ~rst;
+
     `TOP top (
-        .clock    (clk_25mhz),
-        .reset    (1'b0),
+        .clock    (clk_sys),
+        .reset    (!rst_sys_n),
         .io_rx    (ftdi_txd), // confusingly backwards
         .io_tx    (ftdi_rxd),
         .io_gpi_0 (btn[1]),
