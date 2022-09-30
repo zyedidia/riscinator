@@ -62,7 +62,7 @@ tech=orangecrab`. Use `tech=ulx3s` to sythesize for the ULX3S 85F FPGA.
 # Measurements
 
 The project includes support for running CoreMark on Riscinator. It scores
-0.98CM/MHz.
+1.00CM/MHz.
 
 Here is a utilization report for the Riscinator SoC on the ULX3S, including
 RAM, UART, GPIO, and the microprocessor:

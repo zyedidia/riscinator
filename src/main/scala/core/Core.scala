@@ -55,10 +55,7 @@ class Core(conf: Config) extends Module {
   val prev_dmem_rd_req = RegNext(io.dmem.req && !io.dmem.we)
   val prev_dmem_wr_req = RegNext(io.dmem.req && io.dmem.we)
 
-  stall := (prev_imem_rd_req && !io.imem.rvalid) ||
-    (prev_dmem_rd_req && !io.dmem.rvalid) ||
-    (prev_dmem_wr_req && !io.dmem.gnt) ||
-    started
+  stall := started
 
   io.imem.req := fetch.io.imem.req
   io.imem.addr := fetch.io.imem.addr
