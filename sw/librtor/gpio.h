@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bits.h"
+#include "mem.h"
 
 typedef enum {
     GPO_LED_R = 0,
@@ -23,10 +24,10 @@ typedef struct {
 
 static volatile gpio_reg_t* const gpio = (gpio_reg_t*) 0x20000;
 
-static inline void __attribute__((always_inline)) gpo_write(gpo_pin_t pin, unsigned val) {
-    gpio->gpo_val = bit_assign(gpio->gpo_val, pin, val);
+static inline void gpo_write(gpo_pin_t pin, unsigned val) {
+    put32(&gpio->gpo_val, bit_assign(gpio->gpo_val, pin, val));
 }
 
-static inline unsigned __attribute__((always_inline)) gpi_read(gpi_pin_t pin) {
-    return bit_get(gpio->gpi_val, pin);
+static inline unsigned gpi_read(gpi_pin_t pin) {
+    return bit_get(get32(&gpio->gpi_val), pin);
 }
