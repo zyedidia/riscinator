@@ -69,6 +69,9 @@ class Ram(offset: Int, size: Int, addrw: Int, dataw: Int, memfile: String = "") 
     val dmem = Flipped(new RwIO(addrw, dataw))
   })
 
+  // TODO: set err for imem when it is out of bounds (for dmem, the bus only
+  // selects this device when in range and handles out-of-bounds faults in the
+  // arbiter)
   io.imem.err := false.B
   io.dmem.err := false.B
   io.imem.gnt := io.imem.req

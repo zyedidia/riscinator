@@ -125,8 +125,7 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     Csr.mtval -> Reg(UInt(xlen.W))
   )
 
-  // TODO: additional kinds of faults
-  // user mode reading from legal CSRs (currently all CSRs are inaccessible to user mode)
+  // TODO: user mode reading from legal CSRs (currently all CSRs are inaccessible to user mode)
 
   // counters
   regs(Csr.time) := regs(Csr.time) + 1.U
