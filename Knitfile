@@ -15,9 +15,10 @@ local build = chisel.build(src, "rtor", top, gen)
 local verilator = require "build/verilator"
 
 local verilogCore = f"$gen/Core/*.sv"
+local verilogSoc = f"$gen/Soc/*.sv $gen/Soc/generated/*.sv"
 local subtests = include("tests/Knitfile")
 local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
-local sim = verilator.sim("tests/sim.cc", verilogCore, "Core", f"$gen/Core tests/rtor_mem.h")
+local sim = verilator.sim("tests/sim.cc", verilogSoc, "Soc", f"$gen/Soc")
 
 local rules = r(
     {

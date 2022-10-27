@@ -17,10 +17,13 @@ void __attribute__((interrupt)) handler() {
     write_csr(mepc, epc+4);
 }
 
+volatile int x;
+
 int main() {
     exception_init(handler);
     while (1) {
-        asm volatile ("ecall");
+        x = *((volatile int*) (0x10));
+        /* asm volatile ("ecall"); */
         printf("ecall returned\n");
         delay_ms(1000);
     }

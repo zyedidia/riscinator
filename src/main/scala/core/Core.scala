@@ -66,6 +66,8 @@ class Core(conf: Config) extends Module {
   val fe = new {
     val pc = RegEnable(fetch.io.pc, !stall)
     val inst = RegEnable(finst, Instructions.NOP, !stall)
+    val imem_req = RegEnable(io.imem.req, !stall)
+    val imem_addr = RegEnable(io.imem.addr, !stall)
   }
 
   control.io.inst := fe.inst
@@ -83,6 +85,13 @@ class Core(conf: Config) extends Module {
   io.dmem <> execute.io.dmem
 
   val ew = new {
+    val dmem_req = RegEnable(io.dmem.req, !stall)
+    val dmem_addr = RegEnable(io.dmem.addr, !stall)
+    val imem_req = RegEnable(fe.imem_req, !stall)
+    val imem_addr = RegEnable(fe.imem_addr, !stall)
+    val imem_rvalid = RegEnable(io.imem.rvalid, !stall)
+    val imem_err = RegEnable(io.imem.err, !stall)
+
     val wb_sel = RegEnable(control.io.sig.wb_sel, !stall)
     val wb_en = RegEnable(control.io.sig.wb_en, !stall)
     val ld_type = RegEnable(control.io.sig.ld_type, !stall)
@@ -109,6 +118,15 @@ class Core(conf: Config) extends Module {
   csr.io.csr := ew.csr
   csr.io.rs1 := ew.rs1
   csr.io.wdata := ew.rs1r
+
+  csr.io.imem.req := ew.imem_req
+  csr.io.imem.addr := ew.imem_addr
+  csr.io.imem.rvalid := ew.imem_rvalid
+  csr.io.imem.err := ew.imem_err
+  csr.io.dmem.req := ew.dmem_req
+  csr.io.dmem.addr := ew.dmem_addr
+  csr.io.dmem.rvalid := io.dmem.rvalid
+  csr.io.dmem.err := io.dmem.err
 
   writeback.io.ctrl.wb_sel := ew.wb_sel
   writeback.io.ctrl.wb_en := ew.wb_en
@@ -142,5 +160,5 @@ class Core(conf: Config) extends Module {
   fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs2, ew.rd), execute.io.rf.rs2r, ew.alu_out)
 
   // flush the pipeline for slow instructions (loads) and when branches are taken
-  flush := control.io.sig.inst_kill || execute.io.data.br_taken || started
+  flush := control.io.sig.inst_kill || execute.io.data.br_taken || csr.io.epc.valid || started
 }

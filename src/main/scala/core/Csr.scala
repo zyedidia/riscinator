@@ -60,8 +60,18 @@ class CsrCtrlIO extends Bundle {
   val illegal = Input(Bool())
 }
 
+class CsrMemIO(addrw: Int) extends Bundle {
+  val req = Input(Bool())
+  val addr = Input(UInt(addrw.W))
+  val rvalid = Input(Bool())
+  val err = Input(Bool())
+}
+
 class CsrIO(xlen: Int) extends Bundle {
   val ctrl = new CsrCtrlIO()
+
+  val imem = new CsrMemIO(xlen)
+  val dmem = new CsrMemIO(xlen)
 
   val pc = Input(UInt(xlen.W))
   val csr = Input(UInt(12.W))
@@ -141,7 +151,12 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
   val isE = isT(CsrType.ec) || isT(CsrType.eb) || isT(CsrType.er)
   val illegal_priv = !priv_valid && !isE
 
-  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal || illegal_priv
+  val ifault = io.imem.err && io.imem.rvalid
+  val dfault = io.dmem.err && io.dmem.rvalid
+  val lsb = log2Ceil(xlen/8)
+  val imisalign = io.imem.req && io.imem.addr(lsb-1, 0) =/= 0.U(lsb.W)
+  val dmisalign = io.dmem.req && io.dmem.addr(lsb-1, 0) =/= 0.U(lsb.W)
+  val exception = isT(CsrType.ec) || isT(CsrType.eb) || io.ctrl.illegal || illegal_priv || ifault || dfault || imisalign || dmisalign
 
   io.epc.bits := DontCare
   io.epc.valid := false.B
@@ -151,6 +166,10 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     regs(Csr.mcause) := MuxCase(
       DontCare,
       Array(
+        ifault -> Cause.instAccessFault,
+        dfault -> Cause.loadAccessFault,
+        imisalign -> Cause.instAddrMisaligned,
+        dmisalign -> Cause.loadAddrMisaligned,
         (isT(CsrType.ec) && priv === Priv.m) -> Cause.ecallM,
         (isT(CsrType.ec) && priv === Priv.u) -> Cause.ecallU,
         isT(CsrType.eb) -> Cause.breakpoint,

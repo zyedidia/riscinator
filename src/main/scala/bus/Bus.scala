@@ -3,6 +3,18 @@ package rtor.bus
 import chisel3._
 import chisel3.util._
 
+// Bus interface:
+// req: request valid, must stay high until gnt is high for one cycle.
+// addr: address, word aligned.
+// we: write enable, high for writes, low for reads.
+// be: byte enable. Set for the bytes to write/read.
+// wdata: data to be written to memory.
+// gnt: the other side acepted the request. Outputs may change in the next
+// cycle.
+// rvalid: err and rdata hold valid data when rvalid is high. This signal will
+// be high for exactly one cycle per request.
+// rdata: data read from memory.
+
 class RoIO(addrw: Int, dataw: Int) extends Bundle {
   val req = Output(Bool())
   val addr = Output(UInt(addrw.W))
@@ -44,13 +56,13 @@ class SimpleBus(
     val dev = Vec(nDev, new RwIO(addrw, dataw))
   })
 
-  val hostSelBits = if (nHost > 1) log2Ceil(nHost) else 1
-  val devSelBits = if (nDev > 1) log2Ceil(nDev) else 1
+  val hostSelBits = if ((nHost+1) > 1) log2Ceil(nHost+1) else 1
+  val devSelBits = if ((nDev+1) > 1) log2Ceil(nDev+1) else 1
 
   val hostSelReq = Wire(UInt(hostSelBits.W))
 
   // Host select
-  hostSelReq := 0.U
+  hostSelReq := nHost.U
   for (host <- (0 until nHost).reverse) {
     when(io.host(host).req) {
       hostSelReq := host.U
@@ -60,7 +72,7 @@ class SimpleBus(
   val devSelReq = Wire(UInt(devSelBits.W))
 
   // Device select
-  devSelReq := 0.U
+  devSelReq := nDev.U
   for (dev <- 0 until nDev) {
     when((io.host(hostSelReq).addr & ~devs(dev).mask) === devs(dev).base) {
       devSelReq := dev.U
@@ -90,9 +102,15 @@ class SimpleBus(
   for (host <- 0 until nHost) {
     io.host(host).gnt := false.B
     when(host.U === hostSelResp) {
-      io.host(host).rvalid := io.dev(devSelResp).rvalid
-      io.host(host).err := io.dev(devSelResp).err
-      io.host(host).rdata := io.dev(devSelResp).rdata
+      when (devSelResp === nDev.U) {
+        io.host(host).rvalid := true.B
+        io.host(host).err := true.B
+        io.host(host).rdata := 0.U
+      }.otherwise {
+        io.host(host).rvalid := io.dev(devSelResp).rvalid
+        io.host(host).err := io.dev(devSelResp).err
+        io.host(host).rdata := io.dev(devSelResp).rdata
+      }
     }.otherwise {
       io.host(host).rvalid := false.B
       io.host(host).err := false.B

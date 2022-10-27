@@ -1,7 +1,7 @@
 local chisel = {}
 
 function chisel.build(src, pkg, top, gen)
-    local firflags := --disable-annotation-unknown --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
+    local firflags := --dedup --disable-annotation-unknown --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
     local sbt = "sbt --client"
     return {
     $ $gen/%: $gen/%.fir
