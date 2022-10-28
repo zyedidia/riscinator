@@ -20,8 +20,8 @@ local subtests = include("tests/Knitfile")
 local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core tests/hdr")
 local sim = verilator.sim("tests/sim.cc", verilogSoc, "Soc", f"$gen/Soc")
 
-local rules = r(
-    {
+local rules = b{
+    r{
         $ build:V: $gen/$top $gen/rtor.mem
         $ $gen/rtor.mem: sw/$prog/$prog.mem
             cp $input $output
@@ -29,8 +29,10 @@ local rules = r(
             cp $input $output
     },
     build,
-    sim
-)
+    test,
+    sim,
+    subtests
+}
 
 local verilog = f"$gen/$top/*.sv $gen/$top/generated/*.sv"
 
@@ -78,4 +80,4 @@ local swrules = sw.build(prog, clkmhz, conf.cmdebug)
 
 rules = rules + swrules
 
-return {rules, test}
+return {rules}

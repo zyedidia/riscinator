@@ -3,7 +3,7 @@ local chisel = {}
 function chisel.build(src, pkg, top, gen)
     local firflags := --dedup --disable-annotation-unknown --lowering-options=noAlwaysComb,disallowPackedArrays,disallowLocalVariables
     local sbt = "sbt --client"
-    return {
+    return r{
     $ $gen/%: $gen/%.fir
         firtool --split-verilog -o $gen/$match $input --annotation-file=$gen/$match.anno.json $firflags
 

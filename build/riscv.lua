@@ -8,7 +8,7 @@ function riscv.config(ldscript)
     return {
         flags = {
             cc := -O$opt -g -Wall -Wno-unused-function -nostdlib -nostartfiles -ffreestanding -march=$arch -mabi=$abi -std=gnu99 -mcmodel=medany
-            as := -march=$arch -mabi=$abi
+            as := -march=$(arch)_zicsr -mabi=$abi
             ld := -T $ldscript -$ldarch
         },
         prefix := riscv64-unknown-elf-

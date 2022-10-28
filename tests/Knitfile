@@ -12,17 +12,19 @@ local memhdr = knit.extrepl(src, ".s", "_mem.h")
 
 local crules = c.rules(rvtools, rvcfg.flags)
 
-return b(r{
-$ mem:V: $mem
+return b{
+    r{
+    $ mem:V: $mem
 
-$ hdr:V: $memhdr
+    $ hdr:V: $memhdr
 
-$ %_mem.h: %.bin
-    xxd --include $input > $output
+    $ %_mem.h: %.bin
+        xxd --include $input > $output
 
-$ %.elf: %.o
-    $(rvtools.ld) $(rvcfg.flags.ld) $input -o $output
+    $ %.elf: %.o
+        $(rvtools.ld) $(rvcfg.flags.ld) $input -o $output
 
-$ clean:VB:
-    rm -f *.o *.elf *.mem *_mem.h *.bin
-} + crules)
+    $ clean:VB:
+        rm -f *.o *.elf *.mem *_mem.h *.bin
+    }, crules
+}

@@ -3,7 +3,7 @@ local ulx3s = {}
 function ulx3s.build(cons, wrap, top, verilog, dep, quiet)
     local report := report.json
     local q = quiet and "-q" or ""
-    return {
+    return r{
     $ synth:V: $top.bit
 
     $ prog:VB: $top.bit

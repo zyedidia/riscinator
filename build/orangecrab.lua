@@ -3,7 +3,7 @@ local oc = {}
 function oc.build(cons, wrap, top, verilog, dep, quiet)
     local report := report.json
     local q = quiet and "-q" or ""
-    return {
+    return r{
     $ synth:V: $top.dfu
 
     $ prog:VB: $top.dfu

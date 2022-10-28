@@ -12,7 +12,7 @@ function c.toolchain(prefix)
 end
 
 function c.rules(tools, flags)
-    return {
+    return r{
     $ %.o: %.c
         $(tools.cc) $(flags.cc) -c $input -o $output
     $ %.o: %.s
