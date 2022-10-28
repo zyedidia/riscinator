@@ -1,10 +1,10 @@
 local sw = {}
 
 function sw.build(prog, clkmhz, cmdebug)
-    local knit = import("knit")
-    local csrc = knit.join(knit.rglob("sw/librtor", "*.c"), knit.rglob(f"sw/$prog", "*.c"))
-    local ssrc = knit.join(knit.rglob("sw/librtor", "*.s"), knit.rglob(f"sw/$prog", "*.s"))
-    local obj = knit.join(knit.extrepl(csrc, ".c", ".o"), knit.extrepl(ssrc, ".s", ".o"))
+    local knit = require("knit")
+    local csrc = knit.rglob("sw/librtor", "*.c") + knit.rglob(f"sw/$prog", "*.c")
+    local ssrc = knit.rglob("sw/librtor", "*.s") + knit.rglob(f"sw/$prog", "*.s")
+    local obj = knit.extrepl(csrc, ".c", ".o") + knit.extrepl(ssrc, ".s", ".o")
 
     local rvcfg = riscv.config("sw/librtor/memmap.ld", clkmhz)
     rvcfg.flags.cc = rvcfg.flags.cc .. " -Isw/librtor" .. f" -DCLK_FREQ_MHZ=$clkmhz"

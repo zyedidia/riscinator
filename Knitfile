@@ -1,4 +1,4 @@
-local knit = import("knit")
+local knit = require "knit"
 
 local chisel = require "build/chisel"
 
@@ -17,7 +17,7 @@ local verilator = require "build/verilator"
 local verilogCore = f"$gen/Core/*.sv"
 local verilogSoc = f"$gen/Soc/*.sv $gen/Soc/generated/*.sv"
 local subtests = include("tests/Knitfile")
-local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core [$subtests][tests]hdr")
+local test = verilator.tb("tests/tb.cc", verilogCore, "Core", f"$gen/Core tests/hdr")
 local sim = verilator.sim("tests/sim.cc", verilogSoc, "Soc", f"$gen/Soc")
 
 local rules = r(
@@ -29,7 +29,6 @@ local rules = r(
             cp $input $output
     },
     build,
-    test,
     sim
 )
 
@@ -40,31 +39,31 @@ local clkmhz = 1
 local tech = conf.tech or ""
 if tech == "orangecrab" then
     local oc = require "build/orangecrab"
-    rules = r(rules.Rules, oc.build(
+    rules = rules + oc.build(
         "tech/orangecrab/orangecrab.lpf",
         {"tech/orangecrab/top.v", "tech/orangecrab/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top $gen/rtor.mem",
         tobool(conf.quiet or true)
-    ))
+    )
     local clkin = 48
     local clkout = 32
-    rules = r(rules.Rules, {
+    rules = rules + r{
     $ tech/orangecrab/pll.v:
         ecppll --clkin $clkin -o $clkout -f $output
-    })
+    }
     clkmhz = clkout
 elseif tech == "ulx3s" then
     local ulx3s = require "build/ulx3s"
-    rules = r(rules.Rules, ulx3s.build(
+    rules = rules + ulx3s.build(
         "tech/ulx3s/ulx3s_v20.lpf",
         {"tech/ulx3s/top.v", "tech/ulx3s/pll.v"},
         top,
         f"$gen/$top/*.sv $gen/$top/generated/*.sv",
         f"$gen/$top $gen/rtor.mem",
         tobool(conf.quiet or true)
-    ))
+    )
     local clkin = 25
     local clkout = 25
     rules = rules + r{
@@ -77,6 +76,6 @@ end
 local sw = require "build/sw"
 local swrules = sw.build(prog, clkmhz, conf.cmdebug)
 
-rules = r(rules.Rules, swrules.Rules)
+rules = rules + swrules
 
-return rules
+return {rules, test}

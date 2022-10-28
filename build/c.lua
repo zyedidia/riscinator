@@ -29,7 +29,7 @@ function c.rules(tools, flags)
 end
 
 function c.libgcc(cc, cflags)
-    local knit = import("knit")
+    local knit = require("knit")
     return knit.shell(f"$cc $cflags --print-file-name=libgcc.a")
 end
 

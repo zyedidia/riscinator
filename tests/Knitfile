@@ -1,4 +1,4 @@
-local knit = import("knit")
+local knit = require("knit")
 
 local c = include("../build/c.lua")
 local riscv = include("../build/riscv.lua")
@@ -12,7 +12,7 @@ local memhdr = knit.extrepl(src, ".s", "_mem.h")
 
 local crules = c.rules(rvtools, rvcfg.flags)
 
-return r({
+return b(r{
 $ mem:V: $mem
 
 $ hdr:V: $memhdr
@@ -25,4 +25,4 @@ $ %.elf: %.o
 
 $ clean:VB:
     rm -f *.o *.elf *.mem *_mem.h *.bin
-}, crules)
+} + crules)
