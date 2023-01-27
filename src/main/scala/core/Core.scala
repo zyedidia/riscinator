@@ -47,13 +47,13 @@ class Core(conf: Config) extends Module {
 
   val control = Module(new Control())
 
-  val started = RegNext(reset.asBool)
+  val started = RegNext(reset.asBool, false.B)
   val stall = Wire(Bool())
   val flush = Wire(Bool())
 
-  val prev_imem_rd_req = RegNext(io.imem.req)
-  val prev_dmem_rd_req = RegNext(io.dmem.req && !io.dmem.we)
-  val prev_dmem_wr_req = RegNext(io.dmem.req && io.dmem.we)
+  val prev_imem_rd_req = RegNext(io.imem.req, false.B)
+  val prev_dmem_rd_req = RegNext(io.dmem.req && !io.dmem.we, false.B)
+  val prev_dmem_wr_req = RegNext(io.dmem.req && io.dmem.we, false.B)
 
   stall := started
 
@@ -66,7 +66,7 @@ class Core(conf: Config) extends Module {
   val fe = new {
     val pc = RegEnable(fetch.io.pc, !stall)
     val inst = RegEnable(finst, Instructions.NOP, !stall)
-    val imem_req = RegEnable(io.imem.req, !stall)
+    val imem_req = RegEnable(io.imem.req, false.B, !stall)
     val imem_addr = RegEnable(io.imem.addr, !stall)
   }
 
@@ -85,20 +85,20 @@ class Core(conf: Config) extends Module {
   io.dmem <> execute.io.dmem
 
   val ew = new {
-    val dmem_req = RegEnable(io.dmem.req, !stall)
+    val dmem_req = RegEnable(io.dmem.req, false.B, !stall)
     val dmem_addr = RegEnable(io.dmem.addr, !stall)
-    val imem_req = RegEnable(fe.imem_req, !stall)
+    val imem_req = RegEnable(fe.imem_req, false.B, !stall)
     val imem_addr = RegEnable(fe.imem_addr, !stall)
     val imem_rvalid = RegEnable(io.imem.rvalid, !stall)
     val imem_err = RegEnable(io.imem.err, !stall)
 
-    val wb_sel = RegEnable(control.io.sig.wb_sel, !stall)
-    val wb_en = RegEnable(control.io.sig.wb_en, !stall)
-    val ld_type = RegEnable(control.io.sig.ld_type, !stall)
-    val csr_type = RegEnable(control.io.sig.csr_type, !stall)
-    val st_type = RegEnable(control.io.sig.st_type, !stall)
-    val pc_sel = RegEnable(control.io.sig.pc_sel, !stall)
-    val illegal = RegEnable(control.io.sig.illegal, !stall)
+    val wb_sel = RegEnable(control.io.sig.wb_sel, WbSel.alu, !stall)
+    val wb_en = RegEnable(control.io.sig.wb_en, false.B, !stall)
+    val ld_type = RegEnable(control.io.sig.ld_type, LdType.none, !stall)
+    val csr_type = RegEnable(control.io.sig.csr_type, CsrType.n, !stall)
+    val st_type = RegEnable(control.io.sig.st_type, StType.none, !stall)
+    val pc_sel = RegEnable(control.io.sig.pc_sel, PcSel.plus4, !stall)
+    val illegal = RegEnable(control.io.sig.illegal, false.B, !stall)
 
     val rd = RegEnable(execute.io.data.rd, !stall)
     val ld = io.dmem.rdata

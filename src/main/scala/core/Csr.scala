@@ -120,9 +120,9 @@ class Csr(xlen: Int, bootAddr: UInt) extends Module {
     Csr.mtvec -> RegInit(bootAddr),
     Csr.mcounteren -> 0.U(xlen.W),
     Csr.mscratch -> RegInit(0.U(xlen.W)),
-    Csr.mepc -> Reg(UInt(xlen.W)),
-    Csr.mcause -> Reg(UInt(xlen.W)),
-    Csr.mtval -> Reg(UInt(xlen.W))
+    Csr.mepc -> RegInit(0.U(xlen.W)),
+    Csr.mcause -> RegInit(0.U(xlen.W)),
+    Csr.mtval -> RegInit(0.U(xlen.W))
   )
 
   // TODO: user mode reading from legal CSRs (currently all CSRs are inaccessible to user mode)
