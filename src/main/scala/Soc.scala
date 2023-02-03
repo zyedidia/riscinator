@@ -40,7 +40,7 @@ class Soc(memFile: String) extends Module {
   })
 
   val boot = Mmio.RamBase.U(xlen.W)
-  val core = Module(new Core(Config(xlen, boot)))
+  val core = Module(new CoreSingle(Config(xlen, boot)))
 
   val ram = Module(new Ram(log2Ceil(Mmio.RamSize) - 1, Mmio.RamSize, xlen, xlen, memFile))
   val timer = Module(new Timer(log2Ceil(Mmio.TimerSize) - 1, xlen, xlen))

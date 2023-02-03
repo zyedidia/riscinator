@@ -33,7 +33,7 @@ class CoreIO(xlen: Int) extends Bundle {
   val dmem = new DmemIO(xlen, xlen)
 }
 
-class Core(conf: Config) extends Module {
+class CoreSingle(conf: Config) extends Module {
   val io = IO(new CoreIO(conf.xlen))
 
   val rfsz = 32
