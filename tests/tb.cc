@@ -44,33 +44,25 @@ static bool failed = false;
 static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, size_t mem_base, check_t* check) {
     printf("%s...", name);
 
+    uint32_t next_imem_rdata;
+
     core->reset = 1;
     clock(core);
     core->reset = 0;
 
-    uint32_t next_imem_rdata = 0;
-    uint8_t next_imem_rvalid = 0;
-    uint32_t next_dmem_rdata = 0;
-    uint8_t next_dmem_rvalid = 0;
-
     unsigned ncyc = 50;
     for (unsigned i = 0; i < ncyc; i++) {
-        core->eval();
-
-        core->io_imem_rvalid = next_imem_rvalid;
-        core->io_imem_rdata = next_imem_rdata;
-        core->io_dmem_rvalid = next_dmem_rvalid;
-        core->io_dmem_rdata = next_dmem_rdata;
-
-        next_imem_rvalid = core->io_imem_req;
-        next_dmem_rvalid = core->io_dmem_req;
-        core->io_dmem_gnt = core->io_dmem_req;
-        core->eval();
+        core->io_imem_rvalid = core->io_imem_req;
 
         if (core->io_imem_req) {
             assert(addr2idx(core->io_imem_addr, mem_base) < len);
-            next_imem_rdata = mem[addr2idx(core->io_imem_addr, mem_base)];
+            core->io_imem_rdata = mem[addr2idx(core->io_imem_addr, mem_base)];
         }
+
+        core->eval();
+
+        core->io_dmem_rvalid = core->io_dmem_req;
+        core->io_dmem_gnt = core->io_dmem_req;
 
         if (core->io_dmem_req && core->io_dmem_we) {
             uint32_t write = core->io_dmem_wdata;
@@ -79,7 +71,7 @@ static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, s
             mem[addr2idx(core->io_dmem_addr, mem_base)] = write & mask;
         } else if (core->io_dmem_req) {
             assert(addr2idx(core->io_dmem_addr, mem_base) < len);
-            next_dmem_rdata = mem[addr2idx(core->io_dmem_addr, mem_base)];
+            core->io_dmem_rdata = mem[addr2idx(core->io_dmem_addr, mem_base)];
         }
 
         clock(core);
@@ -97,7 +89,7 @@ static void simulate(const char* name, VCore* core, uint32_t* mem, size_t len, s
         auto got = mem[addr2idx(v.idx, mem_base)];
         auto expected = v.value;
         if (got != expected) {
-            printf("FAIL: regs[%d]: %d != %d\n", v.idx, got, expected);
+            printf("FAIL: mem[%d]: %d != %d\n", v.idx, got, expected);
             failed = true;
         }
     }

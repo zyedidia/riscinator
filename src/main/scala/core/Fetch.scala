@@ -5,7 +5,6 @@ import chisel3.util._
 
 class FetchCtrlIO extends Bundle {
   val pc_sel = Input(PcSel())
-  val stall = Input(Bool())
 }
 
 class FetchMemIO(addrw: Int) extends Bundle {
@@ -32,7 +31,7 @@ class Fetch(xlen: Int, bootAddr: UInt) extends Module {
 
   when(io.epc.valid) {
     next := io.epc.bits
-  }.elsewhen(io.ctrl.stall || io.ctrl.pc_sel === PcSel.plus0) {
+  }.elsewhen(io.ctrl.pc_sel === PcSel.plus0) {
     next := pc
   }.elsewhen(io.ctrl.pc_sel === PcSel.alu || io.br_taken) {
     next := io.alu_out & ~(1.U(xlen.W))
@@ -40,6 +39,6 @@ class Fetch(xlen: Int, bootAddr: UInt) extends Module {
     next := pc + 4.U
   }
 
-  io.imem.addr := next
+  io.imem.addr := pc
   io.imem.req := true.B
 }

@@ -48,26 +48,21 @@ class Core(conf: Config) extends Module {
   val control = Module(new Control())
 
   val started = RegNext(reset.asBool, false.B)
-  val stall = Wire(Bool())
-  val flush = Wire(Bool())
 
   val prev_imem_rd_req = RegNext(io.imem.req, false.B)
   val prev_dmem_rd_req = RegNext(io.dmem.req && !io.dmem.we, false.B)
   val prev_dmem_wr_req = RegNext(io.dmem.req && io.dmem.we, false.B)
 
-  stall := started
-
   io.imem.req := fetch.io.imem.req
   io.imem.addr := fetch.io.imem.addr
 
   fetch.io.br_taken := execute.io.data.br_taken
-  val finst = WireInit(Mux(flush, Instructions.NOP, io.imem.rdata))
 
   val fe = new {
-    val pc = RegEnable(fetch.io.pc, !stall)
-    val inst = RegEnable(finst, Instructions.NOP, !stall)
-    val imem_req = RegEnable(io.imem.req, false.B, !stall)
-    val imem_addr = RegEnable(io.imem.addr, !stall)
+    val pc = fetch.io.pc
+    val inst = io.imem.rdata
+    val imem_req = io.imem.req
+    val imem_addr = io.imem.addr
   }
 
   control.io.inst := fe.inst
@@ -85,28 +80,28 @@ class Core(conf: Config) extends Module {
   io.dmem <> execute.io.dmem
 
   val ew = new {
-    val dmem_req = RegEnable(io.dmem.req, false.B, !stall)
-    val dmem_addr = RegEnable(io.dmem.addr, !stall)
-    val imem_req = RegEnable(fe.imem_req, false.B, !stall)
-    val imem_addr = RegEnable(fe.imem_addr, !stall)
-    val imem_rvalid = RegEnable(io.imem.rvalid, !stall)
-    val imem_err = RegEnable(io.imem.err, !stall)
+    val dmem_req = io.dmem.req
+    val dmem_addr = io.dmem.addr
+    val imem_req = fe.imem_req
+    val imem_addr = fe.imem_addr
+    val imem_rvalid = io.imem.rvalid
+    val imem_err = io.imem.err
 
-    val wb_sel = RegEnable(control.io.sig.wb_sel, WbSel.alu, !stall)
-    val wb_en = RegEnable(control.io.sig.wb_en, false.B, !stall)
-    val ld_type = RegEnable(control.io.sig.ld_type, LdType.none, !stall)
-    val csr_type = RegEnable(control.io.sig.csr_type, CsrType.n, !stall)
-    val st_type = RegEnable(control.io.sig.st_type, StType.none, !stall)
-    val pc_sel = RegEnable(control.io.sig.pc_sel, PcSel.plus4, !stall)
-    val illegal = RegEnable(control.io.sig.illegal, false.B, !stall)
+    val wb_sel = control.io.sig.wb_sel
+    val wb_en = control.io.sig.wb_en
+    val ld_type = control.io.sig.ld_type
+    val csr_type = control.io.sig.csr_type
+    val st_type = control.io.sig.st_type
+    val pc_sel = control.io.sig.pc_sel
+    val illegal = control.io.sig.illegal
 
-    val rd = RegEnable(execute.io.data.rd, !stall)
+    val rd = execute.io.data.rd
     val ld = io.dmem.rdata
-    val pc = RegEnable(fe.pc, !stall)
-    val alu_out = RegEnable(execute.io.data.alu_out, !stall)
-    val csr = RegEnable(execute.io.data.csr, !stall)
-    val rs1 = RegEnable(execute.io.rf.rs1, !stall)
-    val rs1r = RegEnable(execute.io.rf.rs1r, !stall)
+    val pc = fe.pc
+    val alu_out = execute.io.data.alu_out
+    val csr = execute.io.data.csr
+    val rs1 = execute.io.rf.rs1
+    val rs1r = execute.io.rf.rs1r
   }
 
   csr.io.ctrl.csr_type := ew.csr_type
@@ -144,21 +139,5 @@ class Core(conf: Config) extends Module {
 
   fetch.io.ctrl.pc_sel := control.io.sig.pc_sel
   fetch.io.alu_out := execute.io.data.alu_out
-  fetch.io.ctrl.stall := stall
   fetch.io.epc := csr.io.epc
-
-  def regeq(r1: UInt, r2: UInt) = r1 =/= 0.U && r1 === r2
-
-  def fwd[T <: Data](cond: Bool, to: T, from: T) =
-    when(cond) {
-      to := from
-    }
-
-  // if an instruction tries to read from an rs1/rs2 while the previous
-  // instruction is still writing it back from the ALU, forward it from the ALU
-  fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs1, ew.rd), execute.io.rf.rs1r, ew.alu_out)
-  fwd(ew.wb_en && ew.wb_sel === WbSel.alu && regeq(execute.io.rf.rs2, ew.rd), execute.io.rf.rs2r, ew.alu_out)
-
-  // flush the pipeline for slow instructions (loads) and when branches are taken
-  flush := control.io.sig.inst_kill || execute.io.data.br_taken || csr.io.epc.valid || started
 }

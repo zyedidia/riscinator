@@ -57,70 +57,69 @@ object Control {
       _.imm_sel -> sig(3),
       _.alu_op -> sig(4),
       _.br_type -> sig(5),
-      _.inst_kill -> sig(6),
-      _.st_type -> sig(7),
-      _.ld_type -> sig(8),
-      _.wb_sel -> sig(9),
-      _.wb_en -> sig(10),
-      _.illegal -> sig(11),
-      _.csr_type -> sig(12)
+      _.st_type -> sig(6),
+      _.ld_type -> sig(7),
+      _.wb_sel -> sig(8),
+      _.wb_en -> sig(9),
+      _.illegal -> sig(10),
+      _.csr_type -> sig(11)
     )
   }
 
   // format: off
-  //                                                                                       inst_kill                              wb_en illegal
-  //                                                                                          |                                       |  |
-  val default = B(List(PcSel.plus4, ASel.none,  BSel.none, ImmSel.x, AluOp.none, BrType.none, N, StType.none, LdType.none, WbSel.alu, N, Y, CsrType.n))
+  //                                                                                                                           wb_en illegal
+  //                                                                                                                               |  |
+  val default = B(List(PcSel.plus4, ASel.none,  BSel.none, ImmSel.x, AluOp.none, BrType.none, StType.none, LdType.none, WbSel.alu, N, Y, CsrType.n))
   val insts = Array(
-    LUI   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.copyB, BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    AUIPC -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.add,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    JAL   -> B(List(PcSel.alu,   ASel.pc,   BSel.imm,  ImmSel.j, AluOp.add,   BrType.none, Y, StType.none, LdType.none, WbSel.pc4, Y, N, CsrType.n)),
-    JALR  -> B(List(PcSel.alu,   ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.none, WbSel.pc4, Y, N, CsrType.n)),
-    BEQ   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.eq,   N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    BNE   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ne,   N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    BLT   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.lt,   N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    BGE   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ge,   N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    BLTU  -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ltu,  N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    BGEU  -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.geu,  N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    LB    -> B(List(PcSel.plus0, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.lb,   WbSel.mem, Y, N, CsrType.n)),
-    LH    -> B(List(PcSel.plus0, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.lh,   WbSel.mem, Y, N, CsrType.n)),
-    LW    -> B(List(PcSel.plus0, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.lw,   WbSel.mem, Y, N, CsrType.n)),
-    LBU   -> B(List(PcSel.plus0, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.lbu,  WbSel.mem, Y, N, CsrType.n)),
-    LHU   -> B(List(PcSel.plus0, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, Y, StType.none, LdType.lhu,  WbSel.mem, Y, N, CsrType.n)),
-    SB    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, N, StType.sb,   LdType.none, WbSel.alu, N, N, CsrType.n)),
-    SH    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, N, StType.sh,   LdType.none, WbSel.alu, N, N, CsrType.n)),
-    SW    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, N, StType.sw,   LdType.none, WbSel.alu, N, N, CsrType.n)),
-    ADDI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLTI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.slt,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLTIU -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sltu,  BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    XORI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.xor,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    ORI   -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.or,    BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    ANDI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.and,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLLI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sll,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SRLI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.srl,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SRAI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sra,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    ADD   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.add,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SUB   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sub,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLL   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sll,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLT   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.slt,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SLTU  -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sltu,  BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    XOR   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.xor,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SRL   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.srl,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    SRA   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sra,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    OR    -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.or,    BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    AND   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.and,   BrType.none, N, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
-    FENCE -> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    FENCEI-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, N, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
-    CSRRW -> B(List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w)),
-    CSRRS -> B(List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s)),
-    CSRRC -> B(List(PcSel.plus0, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c)),
-    CSRRWI-> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w)),
-    CSRRSI-> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s)),
-    CSRRCI-> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c)),
-    ECALL -> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.ec)),
-    EBREAK-> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.eb)),
-    ERET  -> B(List(PcSel.epc,   ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.csr, N, N, CsrType.er)),
-    WFI   -> B(List(PcSel.plus0, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, Y, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n))
+    LUI   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.copyB, BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    AUIPC -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.u, AluOp.add,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    JAL   -> B(List(PcSel.alu,   ASel.pc,   BSel.imm,  ImmSel.j, AluOp.add,   BrType.none, StType.none, LdType.none, WbSel.pc4, Y, N, CsrType.n)),
+    JALR  -> B(List(PcSel.alu,   ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.none, WbSel.pc4, Y, N, CsrType.n)),
+    BEQ   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.eq,   StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    BNE   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ne,   StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    BLT   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.lt,   StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    BGE   -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ge,   StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    BLTU  -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.ltu,  StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    BGEU  -> B(List(PcSel.plus4, ASel.pc,   BSel.imm,  ImmSel.b, AluOp.add,   BrType.geu,  StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    LB    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.lb,   WbSel.mem, Y, N, CsrType.n)),
+    LH    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.lh,   WbSel.mem, Y, N, CsrType.n)),
+    LW    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.lw,   WbSel.mem, Y, N, CsrType.n)),
+    LBU   -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.lbu,  WbSel.mem, Y, N, CsrType.n)),
+    LHU   -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.lhu,  WbSel.mem, Y, N, CsrType.n)),
+    SB    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, StType.sb,   LdType.none, WbSel.alu, N, N, CsrType.n)),
+    SH    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, StType.sh,   LdType.none, WbSel.alu, N, N, CsrType.n)),
+    SW    -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.s, AluOp.add,   BrType.none, StType.sw,   LdType.none, WbSel.alu, N, N, CsrType.n)),
+    ADDI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.add,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLTI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.slt,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLTIU -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sltu,  BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    XORI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.xor,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    ORI   -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.or,    BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    ANDI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.and,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLLI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sll,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SRLI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.srl,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SRAI  -> B(List(PcSel.plus4, ASel.rs1,  BSel.imm,  ImmSel.i, AluOp.sra,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    ADD   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.add,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SUB   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sub,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLL   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sll,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLT   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.slt,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SLTU  -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sltu,  BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    XOR   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.xor,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SRL   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.srl,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    SRA   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.sra,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    OR    -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.or,    BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    AND   -> B(List(PcSel.plus4, ASel.rs1,  BSel.rs2,  ImmSel.x, AluOp.and,   BrType.none, StType.none, LdType.none, WbSel.alu, Y, N, CsrType.n)),
+    FENCE -> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    FENCEI-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n)),
+    CSRRW -> B(List(PcSel.plus4, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w)),
+    CSRRS -> B(List(PcSel.plus4, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s)),
+    CSRRC -> B(List(PcSel.plus4, ASel.rs1,  BSel.none, ImmSel.x, AluOp.copyA, BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c)),
+    CSRRWI-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.w)),
+    CSRRSI-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.s)),
+    CSRRCI-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.z, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, Y, N, CsrType.c)),
+    ECALL -> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.ec)),
+    EBREAK-> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.eb)),
+    ERET  -> B(List(PcSel.epc,   ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.csr, N, N, CsrType.er)),
+    WFI   -> B(List(PcSel.plus4, ASel.none, BSel.none, ImmSel.x, AluOp.none,  BrType.none, StType.none, LdType.none, WbSel.alu, N, N, CsrType.n))
   )
   // format: on
 }
@@ -145,7 +144,6 @@ class ControlSignals extends Bundle {
   val imm_sel = ImmSel()
   val alu_op = AluOp()
   val br_type = BrType()
-  val inst_kill = Bool()
   val st_type = StType()
   val ld_type = LdType()
   val wb_sel = WbSel()
