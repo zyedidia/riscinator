@@ -89,8 +89,8 @@ class Core(conf: Config) extends Module {
     val dmem_addr = RegEnable(io.dmem.addr, !stall)
     val imem_req = RegEnable(fe.imem_req, false.B, !stall)
     val imem_addr = RegEnable(fe.imem_addr, !stall)
-    val imem_rvalid = RegEnable(io.imem.rvalid, !stall)
-    val imem_err = RegEnable(io.imem.err, !stall)
+    val imem_rvalid = RegEnable(io.imem.rvalid, false.B, !stall)
+    val imem_err = RegEnable(io.imem.err, false.B, !stall)
 
     val wb_sel = RegEnable(control.io.sig.wb_sel, WbSel.alu, !stall)
     val wb_en = RegEnable(control.io.sig.wb_en, false.B, !stall)
