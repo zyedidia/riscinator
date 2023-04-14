@@ -44,6 +44,7 @@ The Knitfile has the following targets:
 * `knit synth`: use Yosys to synthesize for the OrangeCrab 25F.
 * `knit prog`: send the bitstream to the FPGA.
 * `knit test`: run the test suite.
+* `knit generated/Soc.sv`: generate the SystemVerilog code for the SoC.
 
 The tests and example programs require you to have a RISC-V GNU toolchain
 installed.
