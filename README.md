@@ -17,7 +17,7 @@ or ULX3S 85F.
 
 Install the dependencies:
 
-* [knit](https://github.com/zyedidia/knit): `eget --pre-release zyedidia/knit`.
+* [knit](https://github.com/zyedidia/knit): `eget zyedidia/knit`.
 * [chisel](https://github.com/chipsalliance/chisel3).
 * [espresso](https://github.com/chipsalliance/espresso): `eget chipsalliance/espresso`.
 * [firtool](https://github.com/llvm/circt): `eget llvm/circt -f firtool --pre-release`.
